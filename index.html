@@ -556,7 +556,7 @@ const LESSONS = [
  ],
  sentences:[
   {t:"他不仅有学问，而且十分聪明。",f:"不仅"},
-  {t:"他停下脚步看了一会儿，叹了一口气。",f:"叹气"},
+  {t:"他停下脚步看了一会儿，叹了一口气。",f:"叹"},
   {t:"杨修笑了笑，胸有成竹地说把门改窄一些就行了。",f:"胸有成竹"},
   {t:"众人听了，有的相信，有的怀疑。",f:"怀疑",moxie:true},
   {t:"众人听了恍然大悟，都很佩服杨修。",f:"恍然大悟",moxie:true},
@@ -571,7 +571,7 @@ const LESSONS = [
   {w:"不约而同",p:"bù yuē ér tóng"},{w:"默默祈祷",p:"mò mò qí dǎo"},{w:"偏偏",p:"piān piān"}
  ],
  sentences:[
-  {t:"我并不知道自己犯了什么错误。",f:"并"},
+  {t:"我并不知道自己犯了什么错误。",f:"错误"},
   {t:"满肚子的委屈涌上心头，我趴在桌子上哭了起来。",f:"委屈"},
   {t:"我感到脸上发烫，额头直冒汗，恨不得找个地洞钻进去！",f:"发烫"},
   {t:"老师温柔地说：「凡是你会回答的，就举右手。」",f:"温柔"},
@@ -690,6 +690,23 @@ const LESSONS = [
   {w:"默默守护",p:"mò mò shǒu hù"},{w:"吸引游客",p:"xī yǐn yóu kè"}
  ],
  sentences:[], tips:[]},
+
+// 补充易错词单元：收录学生反映较难掌握的词语，通过SRS高频复习巩固
+{id:"g5-20", grade:5, lesson:20, title:"补充易错词",
+ words:[
+  {w:"武功",p:"wǔ gōng"},{w:"旋转",p:"xuán zhuǎn"},{w:"观察",p:"guān chá"},
+  {w:"咳嗽",p:"ké sou"},{w:"雪糕",p:"xuě gāo"},{w:"射击",p:"shè jī"},
+  {w:"螃蟹",p:"páng xiè"},{w:"特权",p:"tè quán"},{w:"迎面走来",p:"yíng miàn zǒu lái"},
+  {w:"后悔",p:"hòu huǐ"},{w:"抓耳挠腮",p:"zhuā ěr náo sāi"},{w:"敲打",p:"qiāo dǎ"},
+  {w:"玻璃窗",p:"bō li chuāng"},{w:"攀岩",p:"pān yán"},{w:"黑眼圈",p:"hēi yǎn quān"},
+  {w:"妖魔",p:"yāo mó"},{w:"捧着鲜花",p:"pěng zhe xiān huā"},
+  {w:"戴帽子",p:"dài mào zi"},{w:"阅读",p:"yuè dú"},{w:"纷纷离开",p:"fēn fēn lí kāi"},
+  {w:"模型",p:"mó xíng"},{w:"到达终点",p:"dào dá zhōng diǎn"},{w:"播放乐曲",p:"bō fàng yuè qǔ"},
+  {w:"饮料",p:"yǐn liào"},{w:"理睬",p:"lǐ cǎi"},{w:"随手",p:"suí shǒu"},
+  {w:"塑料",p:"sù liào"},{w:"地铁",p:"dì tiě"},{w:"一段时间",p:"yī duàn shí jiān"}
+ ],
+ sentences:[], tips:[]},
+
 // ============ 六年级 ============
 {id:"g6-1", grade:6, lesson:1, title:"加油！加油！",
  words:[
@@ -911,7 +928,29 @@ const CONFUSABLES = [
  {lessonId:"g5-2", sentence:"我把这一切都抛到了脑后。", blank:"抛", options:["抛","炮","泡","抱"], note:"抛＝扌+九+力"},
  {lessonId:"g6-11", sentence:"罗伯特毫不迟疑，立刻签下合约，笑嘻嘻地离开了。", blank:"疑", options:["疑","凝","拟","疏"], note:"迟疑的疑，左边不是矢"},
  {lessonId:"g5-19", sentence:"她虽然年纪小，成绩却很优秀，是班上的模范生。", blank:"优", options:["优","忧","犹","扰"], note:"都含「尤」：优＝亻+尤，优秀；忧＝忄+尤，忧愁；犹＝犭+尤，犹豫；扰＝扌+尤，打扰"},
- {lessonId:"g5-19", sentence:"老师对待每一位学生都很有耐心，从不偏心。", blank:"待", options:["待","特","诗","寺"], note:"都以「寺」做声旁：待＝彳+寺，对待/等待；特＝牛+寺，特别；诗＝讠+寺，诗歌；寺单独成字，如寺庙"}
+ {lessonId:"g5-19", sentence:"老师对待每一位学生都很有耐心，从不偏心。", blank:"待", options:["待","特","诗","寺"], note:"都以「寺」做声旁：待＝彳+寺，对待/等待；特＝牛+寺，特别；诗＝讠+寺，诗歌；寺单独成字，如寺庙"},
+
+ // ── 「的、地、得」专项辨析 ──
+ // 规则口诀：名词前用"的"（美丽的花），动词/形容词前用"地"（快乐地跑），动词后描述结果程度用"得"（跑得很快）
+ {lessonId:"g5-3", sentence:"有的同学还神气十足__左顾右盼。", blank:"地", options:["的","地","得","着"], note:"动作（左顾右盼）前的修饰语用「地」：神气十足地左顾右盼"},
+ {lessonId:"g5-3", sentence:"妈妈苦口婆心__劝他，他还是一副满不在乎__样子。", blank:"地、的", options:["地、的","的、地","得、的","地、得"], note:"①苦口婆心地劝——动词前用「地」；②满不在乎的样子——名词前用「的」"},
+ {lessonId:"g5-6", sentence:"几个路人看见了，争先恐后__向钞票飘走__方向跑去。", blank:"地、的", options:["地、的","的、地","得、的","地、得"], note:"①争先恐后地跑——动词前用「地」；②飘走的方向——名词前用「的」"},
+ {lessonId:"g5-8", sentence:"为了不输给太阳，我拼命__跑，跑得上气不接下气。", blank:"地", options:["的","地","得","着"], note:"「拼命地跑」——动词前用「地」；「跑得上气不接下气」——结果补语用「得」"},
+ {lessonId:"g5-6", sentence:"望着他远去__背影，我忽然觉__他变得高大起来。", blank:"的、得", options:["的、得","得、的","地、得","的、地"], note:"①远去的背影——名词前用「的」；②觉得——固定词语，不可换成「觉的」"},
+ {lessonId:"g5-2", sentence:"你不但坐__直直的，而且还让我和书本保持一定__距离。", blank:"得、的", options:["得、的","的、得","地、的","得、地"], note:"①坐得直直的——动词后接结果补语用「得」；②一定的距离——名词前用「的」"},
+ // 三合一题：同一句话里三处的/地/得，四个选项各是一组答案组合
+ {lessonId:"g5-1", sentence:"他高兴__跳了起来，脸上露出了灿烂__笑容，真__让人羡慕！", blank:"地、的、的", options:["地、的、的","地、的、得","的、得、地","的、地、的"], note:"①高兴地跳——动词前用「地」；②灿烂的笑容——名词前修饰语用「的」；③真的让人羡慕——「的」作语气助词，表示强调肯定"},
+
+ // ── 需求4：形近字专项辨析 ──
+ {lessonId:"g5-2", sentence:"老师精心__育我们，希望我们将来能成为对社会有贡献的人。", blank:"培", options:["陪","培","赔","倍"], note:"培育/培养——培＝土+不，跟土地、栽培有关；陪伴；赔偿；加倍"},
+ {lessonId:"g6-9", sentence:"他戴上眼__，仔细查看地图上的每一个标记。", blank:"镜", options:["镜","境","竟","竞"], note:"眼镜——镜＝金+竟，跟金属/玻璃有关；境界；竟然；竞争"},
+ {lessonId:"g6-9", sentence:"两队选手在场上激烈地__争，观众们屏息凝神地观看。", blank:"竞", options:["兢","意","竟","竞"], note:"竞争——竞＝立+兄，争夺第一；兢兢业业；意思；竟然"},
+ {lessonId:"g5-13", sentence:"在众多选项中，他仔细__选出了最合适的答案。", blank:"择", options:["泽","择","驿","译"], note:"选择——择＝扌+睪，用手挑选；泽（湖泽）；驿（驿站）；译（翻译）"},
+ {lessonId:"g5-13", sentence:"汉字是古老的文字，距今有三千多年的__史。", blank:"历", options:["历","厉","励","例"], note:"历史的历——历＝厂+力，表示经过、经历；厉（严厉）；励（鼓励）；例（例子）"},
+ {lessonId:"g5-18", sentence:"他去超市__物，买了许多新鲜的蔬菜和水果。", blank:"购", options:["购","够","构","钩"], note:"购物——购＝贝+勾，跟金钱/购买有关；足够；构造；钩子"},
+ {lessonId:"g5-2", sentence:"他在奶奶身边陪伴，让奶奶感受到了加__努力后收获的喜悦。", blank:"倍", options:["陪","培","赔","倍"], note:"加倍——倍＝亻+咅，表示数量倍增；陪伴；培养；赔偿"},
+ {lessonId:"g5-8", sentence:"上课时要__意听讲，不要走神。", blank:"注", options:["注","住","驻","柱"], note:"注意——注＝氵+主，引导注意力（如注水导流）；住（居住）；驻（驻扎）；柱（柱子）"},
+ {lessonId:"g6-10", sentence:"这道数学题太难了，答案真是让人不可思__！", blank:"议", options:["意","义","议","易"], note:"不可思议——议＝讠+义，与语言/商讨有关；意思；意义；容易"}
 ];
 
 
@@ -996,6 +1035,14 @@ async function loadAll(){
   try{
     const r2 = await window.storage.get('settings', false);
     if(r2 && r2.value) SETTINGS = Object.assign(SETTINGS, JSON.parse(r2.value));
+    // 新增课文自动加入 selectedLessons：如果 LESSONS 里有的课 selectedLessons 里没有，自动补上
+    // 这样老用户在升级题库后，新课不需要手动去「选课文」页面勾选
+    const sel = new Set(SETTINGS.selectedLessons);
+    const newLessons = LESSONS.filter(l=>!sel.has(l.id)).map(l=>l.id);
+    if(newLessons.length > 0){
+      SETTINGS.selectedLessons = SETTINGS.selectedLessons.concat(newLessons);
+      await saveSettings();
+    }
   }catch(e){ /* keep defaults */ }
   try{
     const r3 = await window.storage.get('customTips', false);
@@ -1018,9 +1065,37 @@ async function saveTips(){
   try{ await window.storage.set('customTips', JSON.stringify(CUSTOM_TIPS), false); }catch(e){}
 }
 
+// 学生反映容易出错的词，初始ease降低，SRS会更频繁地安排复习
+// lessonId g5-20 = 补充易错词单元，整体设低ease；另有散落在其他课的难词
+const HARD_ITEM_IDS = new Set([
+  'g5-17:w:0',  // 冬暖夏凉
+  'g5-18:w:26', // 犯错误
+  'g6-4:w:6',   // 逛街
+  'g6-8:w:14',  // 左邻右舍
+  'g6-8:w:18',  // 展览
+  // 以词语搭配形式存在的难词
+  'g5-5:w:5',   // 参加测试（含测试）
+  'g5-17:w:9',  // 体形矮小（含矮小）
+  'g5-18:w:0',  // 野外探险（含探险）
+  'g5-18:w:21', // 盯着屏幕（含屏幕）
+  'g5-18:w:37', // 缺少食物（含缺少）
+  'g5-18:w:49', // 新鲜蔬菜（含蔬菜）
+  'g5-19:w:5',  // 鼻子一酸（含鼻子）
+  'g5-19:w:31', // 繁华城市（含繁华）
+  'g5-19:w:60', // 体形矮小（含矮小）
+  'g6-9:w:19',  // 性格固执（含固执）
+  // 第二批补充
+  'g6-5:w:4',   // 说谎
+  'g5-18:w:8',  // 风中摇摆（含摇摆）
+  'g5-18:w:6',  // 竞赛规则（含规则）
+  'g6-10:w:7',  // 获得
+]);
+
 function getState(itemId){
   if(!PROGRESS[itemId]){
-    PROGRESS[itemId] = {ease:2.5, interval:0, reps:0, lapses:0, due:todayStr(), seen:false};
+    // g5-20整个单元，或在难词列表里的条目，初始ease降至1.8（复习频率更高）
+    const isHard = itemId.startsWith('g5-20:') || HARD_ITEM_IDS.has(itemId);
+    PROGRESS[itemId] = {ease: isHard ? 1.8 : 2.5, interval:0, reps:0, lapses:0, due:todayStr(), seen:false};
   }
   return PROGRESS[itemId];
 }
@@ -1101,9 +1176,10 @@ function dueQueue(limit, kindFilter){
   const interleavedFresh = interleaveByLesson(fresh);
   const newBudget = Math.max(0, SETTINGS.dailyNew);
   const queue = due.concat(interleavedFresh.slice(0, newBudget));
-  // 打散一下，避免连续同一课
+  // 完整随机打散（Fisher-Yates），让不同设备/不同次打开的题目顺序有明显差异
   for(let i=queue.length-1;i>0;i--){
-    if(Math.random()<0.35){ const j=Math.floor(Math.random()*(i+1)); [queue[i],queue[j]]=[queue[j],queue[i]]; }
+    const j=Math.floor(Math.random()*(i+1));
+    [queue[i],queue[j]]=[queue[j],queue[i]];
   }
   return limit ? queue.slice(0,limit) : queue;
 }
@@ -1153,9 +1229,9 @@ function hasDueInLesson(lessonId){
 
 // ---------- 选择题质量控制：默认屏蔽字 + 用户自定义题库（持久化） ----------
 const DEFAULT_BLOCKED_CHARS = [
- '的','地','得','了','着','在','是','有','我','你','他','她','它','们','这','那','哪',
+ '了','着','在','是','有','我','你','他','她','它','们','这','那','哪',
  '一','二','三','四','五','六','七','八','九','十','百','千','万',
- '不','也','就','都','很','和','与','但','而','又','还','才','子','个','么','吗','呢','吧','啊','呀',
+ '不','也','就','都','很','和','与','但','而','又','还','才','子','个','么','吗','呢','吧','啊','呀','并',
  '把','被','给','让','叫','到','去','来','上','下','大','小','多','少','好','人','儿','头','中','之',
  '以','为','于','所','其','可','能','会','要','自','已'
 ].filter((v,i,a)=>a.indexOf(v)===i); // 去重
@@ -1234,10 +1310,16 @@ function generateMCQForItem(item, hanziBank, usedKeys, hanziFreq){
   // 1) 尝试匹配精选题库（含用户自定义、排除被删除的内置题）：同课文 + 目标字属于该题的字
   //    同时做数据完整性校验（例句须含答案字、选项须含答案且互不重复），有问题的条目直接跳过，改走动态生成兜底
   const allConfusables = effectiveConfusables();
-  const curatedMatches = allConfusables.filter(c=>
-    c.lessonId===item.lessonId && candidateChars.includes(c.blank) && !usedKeys.has(c._key) &&
-    c.sentence.includes(c.blank) && c.options.includes(c.blank) && new Set(c.options).size===c.options.length
-  );
+  const curatedMatches = allConfusables.filter(c=>{
+    if(usedKeys.has(c._key)) return false;
+    // 多空题（blank含顿号，如"地、的、得"）：句子用__占位，不走candidateChars匹配
+    const isMultiBlank = c.blank.includes('、');
+    if(isMultiBlank) return false; // 多空题由专项通道单独触发，不走常规匹配
+    // 单字题：常规校验
+    return c.lessonId===item.lessonId && candidateChars.includes(c.blank) &&
+      (c.sentence.includes(c.blank) || c.sentence.includes('__')) &&
+      c.options.includes(c.blank) && new Set(c.options).size===c.options.length;
+  });
   if(curatedMatches.length>0){
     const pick = curatedMatches[Math.floor(Math.random()*curatedMatches.length)];
     usedKeys.add(pick._key);
@@ -1694,6 +1776,16 @@ function renderCard(){
     return;
   }
   // 综合混合模式：按条目本身的类型渲染，小概率转为选择题（仍取材于同一条目）
+  // 每隔约5题，插入一道「的/地/得」专项辨析题（独立触发，不依赖词语匹配）
+  const deDiDePool = effectiveConfusables().filter(c=>('的地得'.includes(c.blank) || c.blank.includes('的') || c.blank.includes('地') || c.blank.includes('得')) && !SESSION.usedMCQKeys.has(c._key));
+  const insertDeDiDe = deDiDePool.length > 0 && SESSION.idx > 0 && SESSION.idx % 5 === 0;
+  if(insertDeDiDe){
+    const pick = deDiDePool[Math.floor(Math.random()*deDiDePool.length)];
+    SESSION.usedMCQKeys.add(pick._key);
+    const q = { sentence:pick.sentence, blank:pick.blank, options:pick.options, note:pick.note, key:pick._key };
+    renderMCQCard(el, item, q);
+    return;
+  }
   const mcqChance = item.kind==='word' ? 0.22 : 0.15;
   if(Math.random() < mcqChance){
     const q = generateMCQForItem(item, SESSION.hanziBank, SESSION.usedMCQKeys, SESSION.hanziFreq);
@@ -1793,7 +1885,15 @@ function renderSentenceCard(el, item){
 function renderMCQCard(el, item, q){
   // q.options 已在生成时洗牌，这里仍做一次保险洗牌，避免任何调用路径遗漏
   const shuffledOptions = shuffleArr(q.options);
-  const display = q.sentence.split(q.blank).join('<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿</span>');
+  // 支持两种句子格式：
+  // 1. 句子里含 __ 占位符（多空题，如的地得三合一题），直接替换 __ 为下划线标记
+  // 2. 普通单字挖空：用 split(blank) 找位置
+  let display;
+  if(q.sentence.includes('__')){
+    display = q.sentence.replace(/__/g, '<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿＿</span>');
+  } else {
+    display = q.sentence.split(q.blank).join('<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿</span>');
+  }
   el.innerHTML = `
     ${sessionProgressHTML()}
     <div class="prompt-card">
@@ -1804,8 +1904,11 @@ function renderMCQCard(el, item, q){
       <div class="mcq-options" id="mcqOpts">
         ${shuffledOptions.map((o,i)=>`<div class="mcq-opt" data-o="${o}">${o}</div>`).join('')}
       </div>
-      <div class="answer-reveal" id="revealBox"><div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div></div>
-      <div style="margin-top:14px;"><button class="tool-btn" id="flagBadBtn" style="color:var(--seal-deep);">🚫 这题出得不好</button></div>
+      <div class="answer-reveal" id="revealBox">
+        <div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div>
+        ${q.note ? `<button class="btn btn-primary btn-block" id="nextBtn" style="margin-top:14px;display:none;">下一题 →</button>` : ''}
+      </div>
+      <div style="margin-top:14px;text-align:left;"><button class="tool-btn" id="flagBadBtn" style="color:var(--seal-deep);">🚫 这题出得不好</button></div>
     </div>
   `;
   document.getElementById('speakBtn').addEventListener('click', ()=>speak(q.sentence));
@@ -1829,7 +1932,16 @@ function renderMCQCard(el, item, q){
       if(ok) SESSION.correct++; else SESSION.wrong++;
       reviewItem(item.id, ok);
       flashStamp(ok);
-      setTimeout(()=>{ SESSION.idx++; renderCard(); }, 1100);
+      if(q.note){
+        // 有解释的题：显示"下一题"按钮，让学生读完再跳
+        const nextBtn = document.getElementById('nextBtn');
+        if(nextBtn){
+          nextBtn.style.display = 'block';
+          nextBtn.addEventListener('click', ()=>{ SESSION.idx++; renderCard(); });
+        }
+      } else {
+        setTimeout(()=>{ SESSION.idx++; renderCard(); }, 1100);
+      }
     });
   });
 }
