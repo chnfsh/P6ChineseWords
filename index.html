@@ -953,6 +953,11 @@ const CONFUSABLES = [
  {lessonId:"g5-15", sentence:"我们要学会它__姿态，笔直__站立着。", blank:"的、地", options:["的、地","地、的","得、地","的、得"], note:"①它的姿态——名词前用「的」；②笔直地站立——动词前用「地」"},
  {lessonId:"g6-10", sentence:"从餐馆飘来了一阵阵诱人__菜香，我__肚子开始「捣蛋」了，咕噜咕噜__叫起来。", blank:"的、的、地", options:["的、的、地","地、的、的","的、地、的","得、的、地"], note:"①诱人的菜香、我的肚子——名词前用「的」；②咕噜咕噜地叫——动词前用「地」"},
  {lessonId:"g6-10", sentence:"我像一匹饥饿__狼寻找食物一样，快速__在书架第三排__位置寻找。", blank:"的、地、的", options:["的、地、的","地、的、地","得、地、的","的、的、地"], note:"①饥饿的狼——名词前用「的」；②快速地在……寻找——动词前用「地」；③第三排的位置——名词前用「的」"},
+ {lessonId:"g5-1", sentence:"天渐渐__暖和起来，我们出门踏青，沿途看见了清澈__小河，郁郁葱葱__大树。", blank:"地、的、的", options:["地、的、的","的、地、的","得、的、的","地、得、的"], note:"①渐渐地暖和——副词（渐渐）修饰动词前用「地」；②清澈的小河、郁郁葱葱的大树——名词前用「的」。「得」后面的词语一般用来补充说明「得」前面的动作怎么样，如「累得喘气」"},
+ {lessonId:"g5-8", sentence:"他努力地把一个距离他好几米__大锅往外推，累__直喘粗气。", blank:"的、得", options:["的、得","得、的","地、得","的、地"], note:"①好几米的大锅——名词前用「的」；②累得直喘粗气——「得」引出结果补语，说明「累」到什么程度"},
+ {lessonId:"g5-12", sentence:"运动会马上就要开始了，激动__观众早就拿好东西坐在了看台上，运动员紧张__坐立难安。", blank:"的、得", options:["的、得","得、的","地、得","的、地"], note:"①激动的观众——名词前用「的」；②紧张得坐立难安——「得」引出结果补语，说明「紧张」到什么程度"},
+ {lessonId:"g5-7", sentence:"小狗累__趴在地上喘着粗气。", blank:"得", options:["得","的","地","着"], note:"累得趴在地上——「得」引出结果补语，说明「累」到什么程度；「地上」的「地」是名词，不是助词"},
+ {lessonId:"g5-15", sentence:"羊毛白__就像天上__云彩。", blank:"得、的", options:["得、的","的、得","地、的","得、地"], note:"①白得就像云彩——「得」引出比喻性结果补语，说明「白」到什么程度；②天上的云彩——名词前用「的」"},
 
  // ── 需求4：形近字专项辨析 ──
  {lessonId:"g5-2", sentence:"老师精心__育我们，希望我们将来能成为对社会有贡献的人。", blank:"培", options:["陪","培","赔","倍"], note:"培育/培养——培＝土+不，跟土地、栽培有关；陪伴；赔偿；加倍"},
@@ -1042,7 +1047,7 @@ if(!window.storage){
 const STORE_KEY = 'srs_progress_v1';
 const SETTINGS_KEY = 'app_settings_v1';
 let PROGRESS = {}; // itemId -> {ease, interval, reps, lapses, due, lastResult}
-let SETTINGS = { selectedLessons: LESSONS.map(l=>l.id), examDate:'2026-09-01', dailyNew:18, mode:'mixed', voiceRate:0.85 };
+let SETTINGS = { selectedLessons: LESSONS.map(l=>l.id), examDate:'2026-09-28', dailyNew:18, mode:'mixed', voiceRate:0.85 };
 
 async function loadAll(){
   try{
@@ -1181,6 +1186,7 @@ function dueQueue(limit, kindFilter){
   const fresh = [];
   items.forEach(it=>{
     const st = PROGRESS[it.id];
+    if(st && (st.tooEasy || 0) >= 3) return; // 永久跳过
     if(st && st.seen){
       if(st.due <= today) due.push(it);
     } else {
@@ -2032,10 +2038,18 @@ function renderSentMakingCard(el){
 
 // ---------- 自评按钮 ----------
 function showSelfMark(itemId){
+  const st = getState(itemId);
+  const tooEasyCount = st.tooEasy || 0;
+  const easyLabel = tooEasyCount === 0 ? '这题太简单了' :
+                    tooEasyCount === 1 ? '太简单了（再按1次不再出现）' :
+                                         '太简单了（再按1次永久跳过）';
   document.getElementById('actionArea').innerHTML = `
     <div class="self-mark-row">
       <button class="mark-btn mark-wrong" id="markWrong">✗ 写错了</button>
       <button class="mark-btn mark-right" id="markRight">✓ 写对了</button>
+    </div>
+    <div style="text-align:left;margin-top:10px;">
+      <button id="markEasy" style="background:none;border:none;font-size:12px;color:var(--ink-soft);cursor:pointer;padding:2px 0;text-decoration:underline dotted;">🌱 ${easyLabel}</button>
     </div>
   `;
   document.getElementById('markWrong').addEventListener('click', ()=>{
@@ -2045,6 +2059,24 @@ function showSelfMark(itemId){
   document.getElementById('markRight').addEventListener('click', ()=>{
     SESSION.correct++; reviewItem(itemId, true); flashStamp(true);
     SESSION.idx++; setTimeout(renderCard, 250);
+  });
+  document.getElementById('markEasy').addEventListener('click', ()=>{
+    const st = getState(itemId);
+    st.tooEasy = (st.tooEasy || 0) + 1;
+    if(st.tooEasy >= 3){
+      // 永久跳过：due设为遥远未来，ease拉满，reps标大
+      st.due = '9999-12-31'; st.ease = 2.9; st.interval = 9999; st.seen = true;
+      saveProgress();
+      toast('已永久跳过这道题，以后不会再出现');
+      SESSION.correct++; SESSION.idx++; setTimeout(renderCard, 300);
+    } else {
+      // 第1/2次：大幅拉长复习间隔
+      st.ease = 2.9; st.interval = st.tooEasy === 1 ? 30 : 90;
+      st.due = addDays(todayStr(), st.interval); st.seen = true;
+      saveProgress();
+      toast(st.tooEasy === 1 ? '已减少出现频率（再按一次可永久跳过）' : '复习间隔已拉至三个月（再按一次可永久跳过）');
+      SESSION.correct++; SESSION.idx++; setTimeout(renderCard, 300);
+    }
   });
 }
 
