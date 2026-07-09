@@ -972,7 +972,33 @@ const CONFUSABLES = [
  {lessonId:"g5-18", sentence:"他去超市__物，买了许多新鲜的蔬菜和水果。", blank:"购", options:["购","够","构","钩"], note:"购物——购＝贝+勾，跟金钱/购买有关；足够；构造；钩子"},
  {lessonId:"g5-2", sentence:"他在奶奶身边陪伴，让奶奶感受到了加__努力后收获的喜悦。", blank:"倍", options:["陪","培","赔","倍"], note:"加倍——倍＝亻+咅，表示数量倍增；陪伴；培养；赔偿"},
  {lessonId:"g5-8", sentence:"上课时要__意听讲，不要走神。", blank:"注", options:["注","住","驻","柱"], note:"注意——注＝氵+主，引导注意力（如注水导流）；住（居住）；驻（驻扎）；柱（柱子）"},
- {lessonId:"g6-10", sentence:"这道数学题太难了，答案真是让人不可思__！", blank:"议", options:["意","义","议","易"], note:"不可思议——议＝讠+义，与语言/商讨有关；意思；意义；容易"}
+ {lessonId:"g6-10", sentence:"这道数学题太难了，答案真是让人不可思__！", blank:"议", options:["意","义","议","易"], note:"不可思议——议＝讠+义，与语言/商讨有关；意思；意义；容易"},
+
+ // ── in / ing 拼音辨析专项 ──
+ // yin vs ying
+ {lessonId:"g5-6",  type:"pinyin", sentence:"银行", blank:"yín háng",  options:["yín háng","yíng háng"],  note:"银=yín（前鼻音 in），不是 yíng；记忆：银行是存钱的地方，「银」字读前鼻音"},
+ {lessonId:"g5-15", type:"pinyin", sentence:"阴凉", blank:"yīn liáng", options:["yīn liáng","yīng liáng"], note:"阴=yīn（前鼻音 in），不是 yīng；「阴」和「因」同音，都是前鼻音"},
+ {lessonId:"g5-18", type:"pinyin", sentence:"英雄", blank:"yīng xióng", options:["yīn xióng","yīng xióng"], note:"英=yīng（后鼻音 ing），不是 yīn；「英」字读后鼻音，如英语、英国"},
+ {lessonId:"g5-19", type:"pinyin", sentence:"影响", blank:"yǐng xiǎng", options:["yǐn xiǎng","yǐng xiǎng"], note:"影=yǐng（后鼻音 ing），不是 yǐn；「影」和「影子」同字，读后鼻音"},
+ {lessonId:"g5-18", type:"pinyin", sentence:"引来", blank:"yǐn lái",   options:["yǐn lái","yǐng lái"],   note:"引=yǐn（前鼻音 in），不是 yǐng；「引」和「饮」同音声母相同，都是前鼻音"},
+ {lessonId:"g5-20", type:"pinyin", sentence:"饮料", blank:"yǐn liào",  options:["yǐn liào","yǐng liào"],  note:"饮=yǐn（前鼻音 in），不是 yǐng；「饮料」的「饮」和「引」同音"},
+ // jin vs jing
+ {lessonId:"g5-18", type:"pinyin", sentence:"禁止", blank:"jìn zhǐ",   options:["jìn zhǐ","jìng zhǐ"],   note:"禁=jìn（前鼻音 in），不是 jìng；区分：进（jìn）、金（jīn）都是前鼻音"},
+ {lessonId:"g5-18", type:"pinyin", sentence:"竞赛", blank:"jìng sài",  options:["jìn sài","jìng sài"],    note:"竞=jìng（后鼻音 ing），不是 jìn；区分：镜（jìng）、静（jìng）都是后鼻音"},
+ {lessonId:"g5-19", type:"pinyin", sentence:"精彩", blank:"jīng cǎi",  options:["jīn cǎi","jīng cǎi"],   note:"精=jīng（后鼻音 ing），不是 jīn；「精」和「晶、京」同韵，都是后鼻音"},
+ // xin vs xing
+ {lessonId:"g5-2",  type:"pinyin", sentence:"心情", blank:"xīn qíng",  options:["xīn qíng","xīng qíng"],  note:"心=xīn（前鼻音 in），不是 xīng；「心、新、信」都是前鼻音 xin"},
+ {lessonId:"g5-1",  type:"pinyin", sentence:"行动", blank:"xíng dòng", options:["xín dòng","xíng dòng"],  note:"行=xíng（后鼻音 ing），不是 xín；「行、形、型」都是后鼻音 xing"},
+ {lessonId:"g5-19", type:"pinyin", sentence:"性格", blank:"xìng gé",   options:["xìn gé","xìng gé"],     note:"性=xìng（后鼻音 ing），不是 xìn；「性、星、兴」都是后鼻音 xing"},
+ {lessonId:"g5-18", type:"pinyin", sentence:"新鲜", blank:"xīn xiān",  options:["xīng xiān","xīn xiān"],  note:"新=xīn（前鼻音 in），不是 xīng；「新、心、信」同韵，都是前鼻音"},
+ // pin vs ping
+ {lessonId:"g5-19", type:"pinyin", sentence:"品格", blank:"pǐn gé",    options:["pǐn gé","pǐng gé"],     note:"品=pǐn（前鼻音 in），不是 pǐng；「品、拼、贫」都是前鼻音 pin"},
+ {lessonId:"g5-19", type:"pinyin", sentence:"平台", blank:"píng tái",  options:["pín tái","píng tái"],    note:"平=píng（后鼻音 ing），不是 pín；「平、瓶、评」都是后鼻音 ping"},
+ {lessonId:"g5-18", type:"pinyin", sentence:"屏幕", blank:"píng mù",   options:["pín mù","píng mù"],     note:"屏=píng（后鼻音 ing），不是 pín；「屏」和「平」同音，后鼻音"},
+ // qin vs qing
+ {lessonId:"g5-19", type:"pinyin", sentence:"辛勤", blank:"xīn qín",   options:["xīn qín","xīn qíng"],   note:"勤=qín（前鼻音 in），不是 qíng；区分：「勤、琴、秦」都是前鼻音 qin"},
+ {lessonId:"g5-11", type:"pinyin", sentence:"情况", blank:"qíng kuàng",options:["qín kuàng","qíng kuàng"],note:"情=qíng（后鼻音 ing），不是 qín；「情、晴、青」都是后鼻音 qing"},
+ {lessonId:"g5-19", type:"pinyin", sentence:"亲切", blank:"qīn qiè",   options:["qīng qiè","qīn qiè"],   note:"亲=qīn（前鼻音 in），不是 qīng；「亲、琴」同韵，前鼻音 qin"}
 ];
 
 
@@ -1560,11 +1586,13 @@ function renderHome(){
     </div>
   `;
   const modes = [
-    {id:'mixed', icon:'🎲', t:'综合混合', d:'听写+填空+辨字+造句'},
-    {id:'word', icon:'🖊️', t:'词语听写', d:'听拼音写汉字'},
-    {id:'sentence', icon:'📜', t:'句子默写', d:'挖空/整句默写'},
-    {id:'mcq', icon:'🔍', t:'形近字辨析', d:'选出正确的字'},
-    {id:'sentmaking', icon:'✏️', t:'造句练习', d:'用词语自由造句'},
+    {id:'mixed',    icon:'🎲', t:'综合混合',   d:'听写+填空+辨字+造句'},
+    {id:'word',     icon:'🖊️', t:'词语听写',   d:'听拼音写汉字'},
+    {id:'sentence', icon:'📜', t:'句子默写',   d:'挖空/整句默写'},
+    {id:'mcq',      icon:'🔍', t:'形近字辨析', d:'选出正确的字'},
+    {id:'sentmaking',icon:'✏️',t:'造句练习',   d:'用词语自由造句'},
+    {id:'dede',     icon:'的', t:'的地得专项', d:'专攻三个助词用法'},
+    {id:'pinyin',   icon:'拼', t:'拼音辨析',   d:'in / ing 等易混读音'},
   ];
   const grid = document.getElementById('modeGrid');
   grid.innerHTML = modes.map(m=>`
@@ -1754,6 +1782,24 @@ function startSession(){
     renderCard();
     return;
   }
+  // 的地得专项 / 拼音辨析专项：直接从CONFUSABLES题库建队列，不走dueQueue
+  if(SETTINGS.mode==='dede' || SETTINGS.mode==='pinyin'){
+    const pool = effectiveConfusables().filter(c=>
+      SETTINGS.mode==='pinyin'
+        ? c.type==='pinyin'
+        : (c.type!=='pinyin' && (c.blank.includes('的')||c.blank.includes('地')||c.blank.includes('得')))
+    );
+    if(pool.length===0){ showScreen('practice'); renderSessionDone(true); return; }
+    const shuffled = pool.slice().sort(()=>Math.random()-0.5);
+    // 用虚拟item承载专项题，SRS记录借用第一个选中课文的第一条
+    const fallbackItem = selectedItems()[0] || ITEMS[0];
+    SESSION = { queue: shuffled.map(c=>({...fallbackItem, _confusable:c})),
+      idx:0, correct:0, wrong:0, active:true, sessionLen:shuffled.length,
+      usedMCQKeys:new Set(), usedSentMaking:new Set(), hanziBank:[], hanziFreq:{} };
+    showScreen('practice');
+    renderCard();
+    return;
+  }
   const kindFilter = (SETTINGS.mode==='word' || SETTINGS.mode==='sentence') ? SETTINGS.mode : null;
   const baseQueue = dueQueue(40, kindFilter);
   if(baseQueue.length===0){
@@ -1787,6 +1833,15 @@ function renderCard(){
     return;
   }
   const item = SESSION.queue[SESSION.idx];
+  // 专项模式：的地得专项 / 拼音辨析，队列里的item携带了_confusable
+  if((SETTINGS.mode==='dede' || SETTINGS.mode==='pinyin') && item._confusable){
+    const c = item._confusable;
+    // 找对应lessonId的真实item，用于显示课文标签
+    const realItem = ITEMS.find(it=>it.lessonId===c.lessonId) || item;
+    const q = { type:c.type, sentence:c.sentence, blank:c.blank, options:c.options, note:c.note, key:c._key };
+    renderMCQCard(el, realItem, q);
+    return;
+  }
   if(SETTINGS.mode==='mcq'){
     const q = generateMCQForItem(item, SESSION.hanziBank, SESSION.usedMCQKeys, SESSION.hanziFreq);
     if(q){ renderMCQCard(el, item, q); return; }
@@ -1806,6 +1861,16 @@ function renderCard(){
     const pick = deDiDePool[Math.floor(Math.random()*deDiDePool.length)];
     SESSION.usedMCQKeys.add(pick._key);
     const q = { sentence:pick.sentence, blank:pick.blank, options:pick.options, note:pick.note, key:pick._key };
+    renderMCQCard(el, item, q);
+    return;
+  }
+  // 拼音辨析题：每8题插入一道
+  const pinyinPool = effectiveConfusables().filter(c=>c.type==='pinyin' && !SESSION.usedMCQKeys.has(c._key));
+  const insertPinyin = pinyinPool.length > 0 && SESSION.idx > 0 && SESSION.idx % 8 === 0;
+  if(insertPinyin){
+    const pick = pinyinPool[Math.floor(Math.random()*pinyinPool.length)];
+    SESSION.usedMCQKeys.add(pick._key);
+    const q = { type:'pinyin', sentence:pick.sentence, blank:pick.blank, options:pick.options, note:pick.note, key:pick._key };
     renderMCQCard(el, item, q);
     return;
   }
@@ -1904,38 +1969,65 @@ function renderSentenceCard(el, item){
   speak(item.full);
 }
 
-// ---------- 形近字辨析卡（MCQ） ----------
+// ---------- 形近字辨析卡（MCQ）及拼音辨析卡 ----------
 function renderMCQCard(el, item, q){
   // q.options 已在生成时洗牌，这里仍做一次保险洗牌，避免任何调用路径遗漏
   const shuffledOptions = shuffleArr(q.options);
-  // 支持两种句子格式：
-  // 1. 句子里含 __ 占位符（多空题，如的地得三合一题），直接替换 __ 为下划线标记
-  // 2. 普通单字挖空：用 split(blank) 找位置
-  let display;
-  if(q.sentence.includes('__')){
-    display = q.sentence.replace(/__/g, '<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿＿</span>');
+
+  if(q.type === 'pinyin'){
+    const label = '拼音辨析';
+    // 拼音辨析题：显示词语，选出正确读音
+    el.innerHTML = `
+      ${sessionProgressHTML()}
+      <div class="prompt-card">
+        <div class="lesson-tag">${label} · ${item.grade}年级 第${item.lessonNum}课 <b>《${item.lessonTitle}》</b></div>
+        <button class="speak-btn" id="speakBtn">🔊 朗读词语</button>
+        <div style="font-size:32px;font-family:var(--serif);text-align:center;letter-spacing:4px;margin:16px 0;">${q.sentence}</div>
+        <div class="hint-text">选出正确的拼音</div>
+        <div class="mcq-options" id="mcqOpts">
+          ${shuffledOptions.map(o=>`<div class="mcq-opt" data-o="${o}" style="font-family:monospace;font-size:15px;letter-spacing:1px;">${o}</div>`).join('')}
+        </div>
+        <div class="answer-reveal" id="revealBox">
+          <div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div>
+          ${q.note ? `<button class="btn btn-primary btn-block" id="nextBtn" style="margin-top:14px;display:none;">下一题 →</button>` : ''}
+        </div>
+        <div style="margin-top:14px;text-align:left;"><button class="tool-btn" id="flagBadBtn" style="color:var(--seal-deep);">🚫 这题出得不好</button></div>
+      </div>
+    `;
+    document.getElementById('speakBtn').addEventListener('click', ()=>speak(q.sentence));
+    speak(q.sentence);
   } else {
-    display = q.sentence.split(q.blank).join('<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿</span>');
+    // 支持两种句子格式：
+    // 1. 句子里含 __ 占位符（多空题，如的地得三合一题），直接替换 __ 为下划线标记
+    // 2. 普通单字挖空：用 split(blank) 找位置
+    let display;
+    if(q.sentence.includes('__')){
+      display = q.sentence.replace(/__/g, '<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿＿</span>');
+    } else {
+      display = q.sentence.split(q.blank).join('<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿</span>');
+    }
+    const label2 = (q.blank.includes('的')||q.blank.includes('地')||q.blank.includes('得')) ? '的地得专项' : '形近字辨析';
+    el.innerHTML = `
+      ${sessionProgressHTML()}
+      <div class="prompt-card">
+        <div class="lesson-tag">${label2} · ${item.grade}年级 第${item.lessonNum}课 <b>《${item.lessonTitle}》</b></div>
+        <button class="speak-btn" id="speakBtn">🔊 朗读整句</button>
+        <div class="context-sentence">${display}</div>
+        <div class="hint-text">选出空白处正确的字</div>
+        <div class="mcq-options" id="mcqOpts">
+          ${shuffledOptions.map((o,i)=>`<div class="mcq-opt" data-o="${o}">${o}</div>`).join('')}
+        </div>
+        <div class="answer-reveal" id="revealBox">
+          <div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div>
+          ${q.note ? `<button class="btn btn-primary btn-block" id="nextBtn" style="margin-top:14px;display:none;">下一题 →</button>` : ''}
+        </div>
+        <div style="margin-top:14px;text-align:left;"><button class="tool-btn" id="flagBadBtn" style="color:var(--seal-deep);">🚫 这题出得不好</button></div>
+      </div>
+    `;
+    document.getElementById('speakBtn').addEventListener('click', ()=>speak(q.sentence));
+    speak(q.sentence);
   }
-  el.innerHTML = `
-    ${sessionProgressHTML()}
-    <div class="prompt-card">
-      <div class="lesson-tag">形近字辨析 · ${item.grade}年级 第${item.lessonNum}课 <b>《${item.lessonTitle}》</b></div>
-      <button class="speak-btn" id="speakBtn">🔊 朗读整句</button>
-      <div class="context-sentence">${display}</div>
-      <div class="hint-text">选出空白处正确的字</div>
-      <div class="mcq-options" id="mcqOpts">
-        ${shuffledOptions.map((o,i)=>`<div class="mcq-opt" data-o="${o}">${o}</div>`).join('')}
-      </div>
-      <div class="answer-reveal" id="revealBox">
-        <div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div>
-        ${q.note ? `<button class="btn btn-primary btn-block" id="nextBtn" style="margin-top:14px;display:none;">下一题 →</button>` : ''}
-      </div>
-      <div style="margin-top:14px;text-align:left;"><button class="tool-btn" id="flagBadBtn" style="color:var(--seal-deep);">🚫 这题出得不好</button></div>
-    </div>
-  `;
-  document.getElementById('speakBtn').addEventListener('click', ()=>speak(q.sentence));
-  speak(q.sentence);
+
   let answered = false;
   document.getElementById('flagBadBtn').addEventListener('click', ()=>{
     if(answered) return;
@@ -1956,7 +2048,6 @@ function renderMCQCard(el, item, q){
       reviewItem(item.id, ok);
       flashStamp(ok);
       if(q.note){
-        // 有解释的题：显示"下一题"按钮，让学生读完再跳
         const nextBtn = document.getElementById('nextBtn');
         if(nextBtn){
           nextBtn.style.display = 'block';
