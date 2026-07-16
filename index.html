@@ -1989,7 +1989,6 @@ function renderMCQCard(el, item, q){
         </div>
         <div class="answer-reveal" id="revealBox">
           <div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div>
-          ${q.note ? `<button class="btn btn-primary btn-block" id="nextBtn" style="margin-top:14px;display:none;">下一题 →</button>` : ''}
         </div>
         <div style="margin-top:14px;text-align:left;"><button class="tool-btn" id="flagBadBtn" style="color:var(--seal-deep);">🚫 这题出得不好</button></div>
       </div>
@@ -2019,7 +2018,6 @@ function renderMCQCard(el, item, q){
         </div>
         <div class="answer-reveal" id="revealBox">
           <div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div>
-          ${q.note ? `<button class="btn btn-primary btn-block" id="nextBtn" style="margin-top:14px;display:none;">下一题 →</button>` : ''}
         </div>
         <div style="margin-top:14px;text-align:left;"><button class="tool-btn" id="flagBadBtn" style="color:var(--seal-deep);">🚫 这题出得不好</button></div>
       </div>
@@ -2047,15 +2045,15 @@ function renderMCQCard(el, item, q){
       if(ok) SESSION.correct++; else SESSION.wrong++;
       reviewItem(item.id, ok);
       flashStamp(ok);
-      if(q.note){
-        const nextBtn = el.querySelector('#nextBtn');
-        if(nextBtn){
-          nextBtn.style.display = 'block';
-          nextBtn.addEventListener('click', ()=>{ SESSION.idx++; renderCard(); });
-        }
-      } else {
-        setTimeout(()=>{ SESSION.idx++; renderCard(); }, 1100);
-      }
+      // 无论答对答错，都用动态创建的按钮推进下一题
+      // 避免 iOS PWA 模式下 setTimeout 自动跳转不可靠的问题
+      const revealBox = el.querySelector('#revealBox');
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'btn btn-primary btn-block';
+      nextBtn.style.marginTop = '14px';
+      nextBtn.textContent = '下一题 →';
+      revealBox.appendChild(nextBtn);
+      nextBtn.addEventListener('click', ()=>{ SESSION.idx++; renderCard(); });
     });
   });
 }
