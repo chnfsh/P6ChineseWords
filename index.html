@@ -1994,7 +1994,7 @@ function renderMCQCard(el, item, q){
         <div style="margin-top:14px;text-align:left;"><button class="tool-btn" id="flagBadBtn" style="color:var(--seal-deep);">🚫 这题出得不好</button></div>
       </div>
     `;
-    document.getElementById('speakBtn').addEventListener('click', ()=>speak(q.sentence));
+    el.querySelector('#speakBtn').addEventListener('click', ()=>speak(q.sentence));
     speak(q.sentence);
   } else {
     // 支持两种句子格式：
@@ -2024,31 +2024,31 @@ function renderMCQCard(el, item, q){
         <div style="margin-top:14px;text-align:left;"><button class="tool-btn" id="flagBadBtn" style="color:var(--seal-deep);">🚫 这题出得不好</button></div>
       </div>
     `;
-    document.getElementById('speakBtn').addEventListener('click', ()=>speak(q.sentence));
+    el.querySelector('#speakBtn').addEventListener('click', ()=>speak(q.sentence));
     speak(q.sentence);
   }
 
   let answered = false;
-  document.getElementById('flagBadBtn').addEventListener('click', ()=>{
+  el.querySelector('#flagBadBtn').addEventListener('click', ()=>{
     if(answered) return;
     answered = true;
     flagBadQuestion(q);
   });
-  document.querySelectorAll('#mcqOpts .mcq-opt').forEach(opt=>{
+  el.querySelectorAll('#mcqOpts .mcq-opt').forEach(opt=>{
     opt.addEventListener('click', ()=>{
       if(answered) return;
       answered = true;
       const ok = opt.dataset.o === q.blank;
-      document.querySelectorAll('#mcqOpts .mcq-opt').forEach(o2=>{
+      el.querySelectorAll('#mcqOpts .mcq-opt').forEach(o2=>{
         if(o2.dataset.o===q.blank) o2.classList.add('correct');
         else if(o2===opt && !ok) o2.classList.add('wrong');
       });
-      document.getElementById('revealBox').classList.add('show');
+      el.querySelector('#revealBox').classList.add('show');
       if(ok) SESSION.correct++; else SESSION.wrong++;
       reviewItem(item.id, ok);
       flashStamp(ok);
       if(q.note){
-        const nextBtn = document.getElementById('nextBtn');
+        const nextBtn = el.querySelector('#nextBtn');
         if(nextBtn){
           nextBtn.style.display = 'block';
           nextBtn.addEventListener('click', ()=>{ SESSION.idx++; renderCard(); });
