@@ -340,6 +340,9 @@ textarea.tip-edit{
 </div>
 
 <div class="stamp-pop" id="stampPop">✓</div>
+<div id="globalNextBtn" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:200;width:calc(100% - 48px);max-width:400px;">
+  <button class="btn btn-primary btn-block" style="width:100%;font-size:16px;padding:14px;">下一题 →</button>
+</div>
 
 <script>
 // 梦溪华文听写表 - 五年级(1-17课) + 六年级(1-12课) 完整数据
@@ -1824,6 +1827,9 @@ function sessionProgressHTML(){
 
 function renderCard(){
   const el = document.getElementById('screen-practice');
+  // 每次渲染新题时，先隐藏全局"下一题"按钮（避免上一题残留）
+  const globalNext = document.getElementById('globalNextBtn');
+  if(globalNext) globalNext.style.display = 'none';
   if(!SESSION.active || SESSION.idx >= SESSION.sessionLen){
     renderSessionDone(false);
     return;
@@ -2018,44 +2024,44 @@ function renderMCQCard(el, item, q){
 
   speak(q.sentence);
 
-  // requestAnimationFrame 确保 iOS WebKit PWA 模式下完成 DOM layout 再绑定事件
-  requestAnimationFrame(()=>{
-    const speakBtn = el.querySelector('#speakBtn');
-    if(speakBtn) speakBtn.addEventListener('click', ()=>speak(q.sentence));
+  // 绑定朗读按钮
+  const speakBtn = el.querySelector('#speakBtn');
+  if(speakBtn) speakBtn.addEventListener('click', ()=>speak(q.sentence));
 
-    let answered = false;
-    const flagBadBtn = el.querySelector('#flagBadBtn');
-    if(flagBadBtn) flagBadBtn.addEventListener('click', ()=>{
-      if(answered) return; answered = true; flagBadQuestion(q);
-    });
+  // 使用全局固定"下一题"按钮（始终在DOM里，不动态创建），彻底解决iOS PWA模式下DOM操作不可靠的问题
+  const globalNext = document.getElementById('globalNextBtn');
+  function showNextBtn(){
+    if(!globalNext) return;
+    globalNext.style.display = 'block';
+    globalNext.onclick = ()=>{
+      globalNext.style.display = 'none';
+      SESSION.idx++;
+      renderCard();
+    };
+  }
 
-    el.querySelectorAll('#mcqOpts .mcq-opt').forEach(opt=>{
-      opt.addEventListener('click', ()=>{
-        if(answered) return;
-        answered = true;
-        const ok = opt.dataset.o === q.blank;
-        el.querySelectorAll('#mcqOpts .mcq-opt').forEach(o2=>{
-          if(o2.dataset.o===q.blank) o2.classList.add('correct');
-          else if(o2===opt && !ok) o2.classList.add('wrong');
-        });
-        const revealBox = el.querySelector('#revealBox');
-        if(revealBox) revealBox.classList.add('show');
-        if(ok) SESSION.correct++; else SESSION.wrong++;
-        reviewItem(item.id, ok);
-        flashStamp(ok);
-        // 用第二个 rAF 创建"下一题"按钮，确保在 revealBox show 动画开始后再 append
-        requestAnimationFrame(()=>{
-          const rb = el.querySelector('#revealBox');
-          if(!rb){ setTimeout(()=>{ SESSION.idx++; renderCard(); }, 400); return; }
-          const nextBtn = document.createElement('button');
-          nextBtn.className = 'btn btn-primary btn-block';
-          nextBtn.style.cssText = 'margin-top:14px;width:100%;display:block;';
-          nextBtn.textContent = '下一题 →';
-          rb.appendChild(nextBtn);
-          nextBtn.addEventListener('click', ()=>{ SESSION.idx++; renderCard(); }, {once:true});
-        });
-      }, {once:true});
-    });
+  let answered = false;
+  const flagBadBtn = el.querySelector('#flagBadBtn');
+  if(flagBadBtn) flagBadBtn.addEventListener('click', ()=>{
+    if(answered) return; answered = true; flagBadQuestion(q);
+  });
+
+  el.querySelectorAll('#mcqOpts .mcq-opt').forEach(opt=>{
+    opt.addEventListener('click', ()=>{
+      if(answered) return;
+      answered = true;
+      const ok = opt.dataset.o === q.blank;
+      el.querySelectorAll('#mcqOpts .mcq-opt').forEach(o2=>{
+        if(o2.dataset.o===q.blank) o2.classList.add('correct');
+        else if(o2===opt && !ok) o2.classList.add('wrong');
+      });
+      const revealBox = el.querySelector('#revealBox');
+      if(revealBox) revealBox.classList.add('show');
+      if(ok) SESSION.correct++; else SESSION.wrong++;
+      reviewItem(item.id, ok);
+      flashStamp(ok);
+      showNextBtn();
+    }, {once:true});
   });
 }
 function flagBadQuestion(q){
