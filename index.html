@@ -340,9 +340,6 @@ textarea.tip-edit{
 </div>
 
 <div class="stamp-pop" id="stampPop">✓</div>
-<div id="globalNextBtn" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:200;width:calc(100% - 48px);max-width:400px;">
-  <button class="btn btn-primary btn-block" style="width:100%;font-size:16px;padding:14px;">下一题 →</button>
-</div>
 
 <script>
 // 梦溪华文听写表 - 五年级(1-17课) + 六年级(1-12课) 完整数据
@@ -1536,6 +1533,11 @@ function showScreen(name){
   document.getElementById('screen-'+name).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.nav===name));
   window.scrollTo(0,0);
+  // 离开练习页时重置nextBtn，防止残留按钮出现在其他页面
+  if(name !== 'practice'){
+    const nb = document.querySelector('#screen-practice #nextBtn');
+    if(nb) nb.style.visibility = 'hidden';
+  }
   if(name==='home') renderHome();
   if(name==='lessons') renderLessons();
   if(name==='stats') renderStats();
@@ -1827,9 +1829,6 @@ function sessionProgressHTML(){
 
 function renderCard(){
   const el = document.getElementById('screen-practice');
-  // 每次渲染新题时，先隐藏全局"下一题"按钮（避免上一题残留）
-  const globalNext = document.getElementById('globalNextBtn');
-  if(globalNext) globalNext.style.display = 'none';
   if(!SESSION.active || SESSION.idx >= SESSION.sessionLen){
     renderSessionDone(false);
     return;
@@ -1978,92 +1977,87 @@ function renderSentenceCard(el, item){
 // ---------- 形近字辨析卡（MCQ）及拼音辨析卡 ----------
 function renderMCQCard(el, item, q){
   const shuffledOptions = shuffleArr(q.options);
+  const isP = q.type === 'pinyin';
+  const label = isP ? '拼音辨析'
+    : (q.blank.includes('的')||q.blank.includes('地')||q.blank.includes('得')) ? '的地得专项' : '形近字辨析';
+  const speakLabel = isP ? '🔊 朗读词语' : '🔊 朗读整句';
 
-  if(q.type === 'pinyin'){
-    el.innerHTML = `
-      ${sessionProgressHTML()}
-      <div class="prompt-card">
-        <div class="lesson-tag">拼音辨析 · ${item.grade}年级 第${item.lessonNum}课 <b>《${item.lessonTitle}》</b></div>
-        <button class="speak-btn" id="speakBtn">🔊 朗读词语</button>
-        <div style="font-size:32px;font-family:var(--serif);text-align:center;letter-spacing:4px;margin:16px 0;">${q.sentence}</div>
-        <div class="hint-text">选出正确的拼音</div>
-        <div class="mcq-options" id="mcqOpts">
-          ${shuffledOptions.map(o=>`<div class="mcq-opt" data-o="${o}" style="font-family:monospace;font-size:15px;letter-spacing:1px;">${o}</div>`).join('')}
-        </div>
-        <div class="answer-reveal" id="revealBox">
-          <div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div>
-        </div>
-        <div style="margin-top:14px;text-align:left;"><button class="tool-btn" id="flagBadBtn" style="color:var(--seal-deep);">🚫 这题出得不好</button></div>
-      </div>
-    `;
+  let bodyHTML;
+  if(isP){
+    const optHTML = shuffledOptions.map(o=>
+      `<div class="mcq-opt" data-o="${o}" style="font-family:monospace;font-size:15px;letter-spacing:1px;">${o}</div>`
+    ).join('');
+    bodyHTML = `
+      <div style="font-size:32px;font-family:var(--serif);text-align:center;letter-spacing:4px;margin:16px 0;">${q.sentence}</div>
+      <div class="hint-text">选出正确的拼音</div>
+      <div class="mcq-options" id="mcqOpts">${optHTML}</div>`;
   } else {
     let display;
     if(q.sentence.includes('__')){
-      display = q.sentence.replace(/__/g, '<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿＿</span>');
+      display = q.sentence.replace(/__/g,'<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿＿</span>');
     } else {
       display = q.sentence.split(q.blank).join('<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿</span>');
     }
-    const label2 = (q.blank.includes('的')||q.blank.includes('地')||q.blank.includes('得')) ? '的地得专项' : '形近字辨析';
-    el.innerHTML = `
-      ${sessionProgressHTML()}
-      <div class="prompt-card">
-        <div class="lesson-tag">${label2} · ${item.grade}年级 第${item.lessonNum}课 <b>《${item.lessonTitle}》</b></div>
-        <button class="speak-btn" id="speakBtn">🔊 朗读整句</button>
-        <div class="context-sentence">${display}</div>
-        <div class="hint-text">选出空白处正确的字</div>
-        <div class="mcq-options" id="mcqOpts">
-          ${shuffledOptions.map(o=>`<div class="mcq-opt" data-o="${o}">${o}</div>`).join('')}
-        </div>
-        <div class="answer-reveal" id="revealBox">
-          <div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div>
-        </div>
-        <div style="margin-top:14px;text-align:left;"><button class="tool-btn" id="flagBadBtn" style="color:var(--seal-deep);">🚫 这题出得不好</button></div>
+    const optHTML = shuffledOptions.map(o=>`<div class="mcq-opt" data-o="${o}">${o}</div>`).join('');
+    bodyHTML = `
+      <div class="context-sentence">${display}</div>
+      <div class="hint-text">选出空白处正确的字</div>
+      <div class="mcq-options" id="mcqOpts">${optHTML}</div>`;
+  }
+
+  // "下一题"按钮写在HTML里，用visibility控制显隐（不用display，避免iOS layout reflow触发DOM异常）
+  el.innerHTML = `
+    ${sessionProgressHTML()}
+    <div class="prompt-card">
+      <div class="lesson-tag">${label} · ${item.grade}年级 第${item.lessonNum}课 <b>《${item.lessonTitle}》</b></div>
+      <button id="speakBtn" class="speak-btn">${speakLabel}</button>
+      ${bodyHTML}
+      <div class="answer-reveal" id="revealBox">
+        <div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div>
+        <button id="nextBtn" class="btn btn-primary btn-block" style="margin-top:14px;visibility:hidden;">下一题 →</button>
       </div>
-    `;
-  }
+      <div style="margin-top:14px;text-align:left;">
+        <button id="flagBadBtn" class="tool-btn" style="color:var(--seal-deep);">🚫 这题出得不好</button>
+      </div>
+    </div>
+  `;
 
-  speak(q.sentence);
+  // 事件绑定——speak 放在最后，避免 iOS Web Speech API 干扰 DOM 状态
+  const speakBtn  = el.querySelector('#speakBtn');
+  const flagBtn   = el.querySelector('#flagBadBtn');
+  const nextBtn   = el.querySelector('#nextBtn');
+  const revealBox = el.querySelector('#revealBox');
+  const opts      = el.querySelectorAll('#mcqOpts .mcq-opt');
 
-  // 绑定朗读按钮
-  const speakBtn = el.querySelector('#speakBtn');
   if(speakBtn) speakBtn.addEventListener('click', ()=>speak(q.sentence));
-
-  // 使用全局固定"下一题"按钮（始终在DOM里，不动态创建），彻底解决iOS PWA模式下DOM操作不可靠的问题
-  const globalNext = document.getElementById('globalNextBtn');
-  function showNextBtn(){
-    if(!globalNext) return;
-    globalNext.style.display = 'block';
-    globalNext.onclick = ()=>{
-      globalNext.style.display = 'none';
-      SESSION.idx++;
-      renderCard();
-    };
-  }
+  if(nextBtn)  nextBtn.addEventListener('click', ()=>{ SESSION.idx++; renderCard(); }, {once:true});
 
   let answered = false;
-  const flagBadBtn = el.querySelector('#flagBadBtn');
-  if(flagBadBtn) flagBadBtn.addEventListener('click', ()=>{
+  if(flagBtn) flagBtn.addEventListener('click', ()=>{
     if(answered) return; answered = true; flagBadQuestion(q);
   });
 
-  el.querySelectorAll('#mcqOpts .mcq-opt').forEach(opt=>{
+  opts.forEach(opt=>{
     opt.addEventListener('click', ()=>{
       if(answered) return;
       answered = true;
       const ok = opt.dataset.o === q.blank;
-      el.querySelectorAll('#mcqOpts .mcq-opt').forEach(o2=>{
+      opts.forEach(o2=>{
         if(o2.dataset.o===q.blank) o2.classList.add('correct');
         else if(o2===opt && !ok) o2.classList.add('wrong');
       });
-      const revealBox = el.querySelector('#revealBox');
       if(revealBox) revealBox.classList.add('show');
+      if(nextBtn) nextBtn.style.visibility = 'visible';  // 只改visibility，不改display
       if(ok) SESSION.correct++; else SESSION.wrong++;
       reviewItem(item.id, ok);
       flashStamp(ok);
-      showNextBtn();
     }, {once:true});
   });
+
+  // speak 最后调用，避免干扰上面的 DOM 绑定
+  speak(q.sentence);
 }
+
 function flagBadQuestion(q){
   if(q.key.startsWith('dyn:')){
     const ch = q.blank;
