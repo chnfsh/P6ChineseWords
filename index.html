@@ -1536,7 +1536,7 @@ function showScreen(name){
   // 离开练习页时重置nextBtn，防止残留按钮出现在其他页面
   if(name !== 'practice'){
     const nb = document.querySelector('#screen-practice #nextBtn');
-    if(nb) nb.style.visibility = 'hidden';
+    if(nb) nb.style.display = 'none';
   }
   if(name==='home') renderHome();
   if(name==='lessons') renderLessons();
@@ -1771,7 +1771,7 @@ renderCountdown();
 
 
 // ============ 练习会话引擎 ============
-let SESSION = { queue:[], idx:0, correct:0, wrong:0, active:false, usedMCQKeys:new Set(), usedSentMaking:new Set(), hanziBank:[], hanziFreq:{} };
+let SESSION = { queue:[], idx:0, correct:0, wrong:0, wrongIds:[], active:false, usedMCQKeys:new Set(), usedSentMaking:new Set(), hanziBank:[], hanziFreq:{} };
 
 function startSession(){
   if(SETTINGS.selectedLessons.length===0){
@@ -1781,7 +1781,7 @@ function startSession(){
   if(SETTINGS.mode==='sentmaking'){
     const pool = SENTENCE_MAKING_WORDS.length + SENTENCE_PATTERNS.length;
     const sessionLen = Math.min(SETTINGS.dailyNew || 12, pool);
-    SESSION = { queue:new Array(sessionLen).fill(null), idx:0, correct:0, wrong:0, active:true,
+    SESSION = { queue:new Array(sessionLen).fill(null), idx:0, correct:0, wrong:0, wrongIds:[], active:true,
       sessionLen, usedMCQKeys:new Set(), usedSentMaking:new Set(), hanziBank:[], hanziFreq:{} };
     showScreen('practice');
     renderCard();
@@ -1799,7 +1799,7 @@ function startSession(){
     // 用虚拟item承载专项题，SRS记录借用第一个选中课文的第一条
     const fallbackItem = selectedItems()[0] || ITEMS[0];
     SESSION = { queue: shuffled.map(c=>({...fallbackItem, _confusable:c})),
-      idx:0, correct:0, wrong:0, active:true, sessionLen:shuffled.length,
+      idx:0, correct:0, wrong:0, wrongIds:[], active:true, sessionLen:shuffled.length,
       usedMCQKeys:new Set(), usedSentMaking:new Set(), hanziBank:[], hanziFreq:{} };
     showScreen('practice');
     renderCard();
@@ -1812,7 +1812,7 @@ function startSession(){
     renderSessionDone(true);
     return;
   }
-  SESSION = { queue: baseQueue, idx:0, correct:0, wrong:0, active:true, sessionLen: baseQueue.length,
+  SESSION = { queue: baseQueue, idx:0, correct:0, wrong:0, wrongIds:[], active:true, sessionLen: baseQueue.length,
     usedMCQKeys:new Set(), usedSentMaking:new Set(), hanziBank: buildHanziBank(), hanziFreq: buildHanziFreq() };
   showScreen('practice');
   renderCard();
@@ -1838,10 +1838,10 @@ function renderCard(){
     return;
   }
   const item = SESSION.queue[SESSION.idx];
-  // 专项模式：的地得专项 / 拼音辨析，队列里的item携带了_confusable
-  if((SETTINGS.mode==='dede' || SETTINGS.mode==='pinyin') && item._confusable){
+  // 专项题：只要队列里的item携带了_confusable（无论当前mode），都走专项渲染
+  // 这样重做错题时混合队列（普通题+confusable题）也能正确处理
+  if(item && item._confusable){
     const c = item._confusable;
-    // 找对应lessonId的真实item，用于显示课文标签
     const realItem = ITEMS.find(it=>it.lessonId===c.lessonId) || item;
     const q = { type:c.type, sentence:c.sentence, blank:c.blank, options:c.options, note:c.note, key:c._key };
     renderMCQCard(el, realItem, q);
@@ -2014,7 +2014,7 @@ function renderMCQCard(el, item, q){
       ${bodyHTML}
       <div class="answer-reveal" id="revealBox">
         <div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div>
-        <button id="nextBtn" class="btn btn-primary btn-block" style="margin-top:14px;visibility:hidden;">下一题 →</button>
+        <button id="nextBtn" class="btn btn-primary btn-block" style="margin-top:14px;display:none;">下一题 →</button>
       </div>
       <div style="margin-top:14px;text-align:left;">
         <button id="flagBadBtn" class="tool-btn" style="color:var(--seal-deep);">🚫 这题出得不好</button>
@@ -2047,8 +2047,15 @@ function renderMCQCard(el, item, q){
         else if(o2===opt && !ok) o2.classList.add('wrong');
       });
       if(revealBox) revealBox.classList.add('show');
-      if(nextBtn) nextBtn.style.visibility = 'visible';  // 只改visibility，不改display
-      if(ok) SESSION.correct++; else SESSION.wrong++;
+      if(nextBtn) nextBtn.style.display = 'block';
+      if(ok) SESSION.correct++; else {
+          SESSION.wrong++;
+          // confusable专项题（拼音/的地得）用_conf:前缀记录key，普通题记录item.id
+          // 注意：renderMCQCard传入的是realItem（无_confusable属性），所以用q.key判断
+          if(q.key && (q.key.startsWith('cur:') || q.key.startsWith('usr:')))
+            SESSION.wrongIds.push('_conf:'+q.key);
+          else if(item.id) SESSION.wrongIds.push(item.id);
+        }
       reviewItem(item.id, ok);
       flashStamp(ok);
     }, {once:true});
@@ -2143,7 +2150,7 @@ function showSelfMark(itemId){
     </div>
   `;
   document.getElementById('markWrong').addEventListener('click', ()=>{
-    SESSION.wrong++; reviewItem(itemId, false); flashStamp(false);
+    SESSION.wrong++; SESSION.wrongIds.push(itemId); reviewItem(itemId, false); flashStamp(false);
     SESSION.idx++; setTimeout(renderCard, 250);
   });
   document.getElementById('markRight').addEventListener('click', ()=>{
@@ -2192,20 +2199,80 @@ function renderSessionDone(noneToReview){
   }
   const total = SESSION.correct + SESSION.wrong;
   const pct = total? Math.round(SESSION.correct/total*100) : 100;
+  const wrongIds = (SESSION.wrongIds||[]).filter((id,i,a)=>a.indexOf(id)===i); // 去重
+  const wrongClickable = wrongIds.length > 0;
+
   el.innerHTML = `
     <div class="empty-state">
       <div class="ei">🏮</div>
       <h2 style="font-family:var(--serif);">本轮练习完成！</h2>
       <div class="stat-row" style="max-width:320px;margin:18px auto;">
         <div class="stat-box mastered"><div class="n">${SESSION.correct}</div><div class="l">答对</div></div>
-        <div class="stat-box due"><div class="n">${SESSION.wrong}</div><div class="l">答错</div></div>
+        <div class="stat-box due">
+          <div class="n" id="wrongCount" style="${wrongClickable?'cursor:pointer;text-decoration:underline dotted;color:var(--seal);':''}">${SESSION.wrong}</div>
+          <div class="l">答错${wrongClickable?'（点击查看）':''}</div>
+        </div>
         <div class="stat-box"><div class="n">${pct}%</div><div class="l">正确率</div></div>
       </div>
+      <div id="wrongDetail" style="display:none;max-width:340px;margin:0 auto 18px;text-align:left;"></div>
       <div class="btn-row" style="max-width:340px;margin:0 auto;">
         <button class="btn btn-primary btn-block" onclick="startSession()">再来一轮</button>
         <button class="btn btn-outline btn-block" onclick="showScreen('home')">返回首页</button>
       </div>
     </div>`;
+
+  if(wrongClickable){
+    document.getElementById('wrongCount').addEventListener('click', ()=>{
+      const detail = document.getElementById('wrongDetail');
+      if(detail.style.display !== 'none'){ detail.style.display='none'; return; }
+
+      // 区分普通词语题和confusable专项题（拼音/的地得）
+      const confKeys   = wrongIds.filter(id=>id.startsWith('_conf:')).map(id=>id.slice(6));
+      const normalIds  = wrongIds.filter(id=>!id.startsWith('_conf:'));
+      const wrongItems = normalIds.map(id=>ITEMS.find(it=>it.id===id)).filter(Boolean);
+      const confItems  = confKeys.map(key=>effectiveConfusables().find(c=>c._key===key)).filter(Boolean);
+
+      const normalHTML = wrongItems.map(it=>`
+        <div style="background:var(--warm);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:15px;font-family:var(--serif);font-weight:600;">${it.kind==='word'?it.text:(it.focus||it.full.slice(0,12)+'…')}</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">${it.grade}年级第${it.lessonNum}课·${it.kind==='word'?'词语':'句子'}</div>
+          </div>
+          <span style="font-size:11px;color:var(--seal);background:rgba(192,57,43,.1);padding:2px 8px;border-radius:10px;">错${PROGRESS[it.id]?PROGRESS[it.id].lapses:1}次</span>
+        </div>`).join('');
+
+      const confHTML = confItems.map(c=>`
+        <div style="background:var(--warm);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:15px;font-family:var(--serif);font-weight:600;">${c.sentence.length<=6?c.sentence:c.sentence.slice(0,10)+'…'}</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">${c.type==='pinyin'?'拼音辨析':'的地得专项'} · 正确答案：${c.blank}</div>
+          </div>
+          <span style="font-size:11px;color:var(--seal);background:rgba(192,57,43,.1);padding:2px 8px;border-radius:10px;">本轮错</span>
+        </div>`).join('');
+
+      const totalWrong = wrongItems.length + confItems.length;
+      detail.innerHTML = `
+        <div style="font-size:13px;color:var(--ink-soft);margin-bottom:10px;">本轮答错 ${totalWrong} 题：</div>
+        ${normalHTML}${confHTML}
+        <button class="btn btn-secondary btn-block" style="margin-top:6px;" id="redoWrongBtn">🔁 马上重做这 ${totalWrong} 题</button>
+      `;
+      detail.style.display = 'block';
+
+      document.getElementById('redoWrongBtn').addEventListener('click', ()=>{
+        // 普通题：直接用 item 对象
+        const redoNormal = wrongItems.map(it=>it);
+        // confusable题：重建带 _confusable 的虚拟 item
+        const fallback = ITEMS.find(it=>it.lessonId===(confItems[0]&&confItems[0].lessonId)) || ITEMS[0];
+        const redoConf = confItems.map(c=>({...fallback, _confusable:c}));
+        const redoQueue = [...redoNormal, ...redoConf].sort(()=>Math.random()-0.5);
+        SESSION = { queue:redoQueue, idx:0, correct:0, wrong:0, wrongIds:[], active:true,
+          sessionLen:redoQueue.length, usedMCQKeys:new Set(), usedSentMaking:new Set(),
+          hanziBank:buildHanziBank(), hanziFreq:buildHanziFreq() };
+        showScreen('practice');
+        renderCard();
+      });
+    });
+  }
 }
 
 // ============ 错字本 / 统计页 ============
