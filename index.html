@@ -139,20 +139,40 @@ h2.section-title .tag{
 .btn[disabled]{opacity:0.4; cursor:not-allowed;}
 
 .mode-section{margin-top:14px;}
-.mode-selected{
-  display:flex;justify-content:center;margin-bottom:16px;
+/* 胶囊组合 */
+.mode-capsule-wrap{display:flex;justify-content:center;margin:20px 0 6px;}
+.mode-capsule{
+  display:flex;align-items:center;
+  border-radius:999px;overflow:hidden;
+  box-shadow:0 2px 12px rgba(26,20,16,.12), 0 6px 24px rgba(26,20,16,.08);
 }
-.mode-badge{
+.mode-capsule-circle{
+  width:84px;height:84px;flex-shrink:0;
+  background:var(--seal);color:#fff;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  width:88px;height:88px;border-radius:50%;
-  background:var(--seal);color:#fff;cursor:pointer;
-  box-shadow:0 4px 16px rgba(192,57,43,.35);
-  transition:transform .18s ease, box-shadow .18s ease;
-  user-select:none;
+  cursor:pointer;user-select:none;
+  transition:filter .15s;
+  position:relative;z-index:1;
+  box-shadow:2px 0 8px rgba(192,57,43,.25);
 }
-.mode-badge:active{transform:scale(.93);}
-.mode-badge .mi{font-size:26px;line-height:1;}
-.mode-badge .mt{font-size:11px;margin-top:4px;font-family:var(--serif);letter-spacing:.5px;text-align:center;}
+.mode-capsule-circle:active{filter:brightness(.88);}
+.mode-capsule-circle .mi{font-size:24px;line-height:1;}
+.mode-capsule-circle .mt{font-size:10px;margin-top:3px;font-family:var(--serif);letter-spacing:.5px;}
+.mode-capsule-bar{
+  height:84px;padding:0 28px;
+  background:var(--warm);color:var(--ink);
+  border:none;cursor:pointer;
+  font-size:16px;font-family:var(--serif);letter-spacing:2px;
+  white-space:nowrap;
+  transition:filter .15s;
+  box-shadow:inset 2px 0 6px rgba(26,20,16,.06);
+}
+.mode-capsule-bar:active{filter:brightness(.95);}
+/* 选择提示 */
+.mode-choose-label{
+  text-align:center;font-size:11.5px;color:var(--ink-soft);
+  letter-spacing:1px;margin-bottom:10px;
+}
 .mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .mode-card{
   background:#FBF8F0;border:1.5px solid var(--card-line);border-radius:12px;
@@ -1659,10 +1679,8 @@ function renderHome(){
         </div>
       </div>
       ${stats.dueToday===0 && stats.mastered>0 ? `<div style="font-size:11px;color:var(--ink-soft);margin-top:8px;text-align:center;">✓ 今日到期词语已全部复习，继续练习会巩固未到期的词</div>` : ''}
-      <button class="btn btn-primary btn-block" style="margin-top:20px;" onclick="startSession()">📝 开始今日复习</button>
     </div>
 
-    <h2 class="section-title">练习模式</h2>
     <div class="mode-section" id="modeSection"></div>
 
     <h2 class="section-title">总体进度</h2>
@@ -1689,12 +1707,20 @@ function renderHome(){
   const cur = modes.find(m=>m.id===SETTINGS.mode) || modes[0];
   const sec = document.getElementById('modeSection');
   sec.innerHTML = `
-    <div class="mode-selected">
-      <div class="mode-badge" id="modeBadge">
-        <div class="mi">${cur.icon}</div>
-        <div class="mt">${cur.t}</div>
+    <!-- 胶囊组合：圆形模式徽章 + 长条开始按钮 -->
+    <div class="mode-capsule-wrap">
+      <div class="mode-capsule">
+        <div class="mode-capsule-circle" id="modeBadge">
+          <div class="mi">${cur.icon}</div>
+          <div class="mt">${cur.t}</div>
+        </div>
+        <button class="mode-capsule-bar" onclick="startSession()">
+          开始练习 →
+        </button>
       </div>
     </div>
+    <!-- 选择提示 + 模式卡片 -->
+    <div class="mode-choose-label">选择练习模式</div>
     <div class="mode-grid" id="modeGrid">
       ${modes.map(m=>`
         <div class="mode-card${m.id===cur.id?' mode-card-active':''}" data-mode="${m.id}">
@@ -1706,11 +1732,17 @@ function renderHome(){
   `;
   sec.querySelectorAll('.mode-card').forEach(c=>{
     c.addEventListener('click', ()=>{
-      if(c.dataset.mode === SETTINGS.mode) return; // 已选中，不重复渲染
+      if(c.dataset.mode === SETTINGS.mode) return;
       c.style.transform='scale(.88) translateY(-6px)';
       c.style.opacity='0';
       setTimeout(()=>{ SETTINGS.mode=c.dataset.mode; saveSettings(); renderHome(); }, 160);
     });
+  });
+  // 点圆形徽章循环切换到下一个模式
+  document.querySelector('.mode-capsule-circle').addEventListener('click', ()=>{
+    const idx = modes.findIndex(m=>m.id===cur.id);
+    SETTINGS.mode = modes[(idx+1)%modes.length].id;
+    saveSettings(); renderHome();
   });
   if(stats.errCount>0){
     document.getElementById('errStatBox').addEventListener('click', ()=>showScreen('stats'));
