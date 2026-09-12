@@ -1082,7 +1082,7 @@ if(!window.storage){
 const STORE_KEY = 'srs_progress_v1';
 const SETTINGS_KEY = 'app_settings_v1';
 let PROGRESS = {}; // itemId -> {ease, interval, reps, lapses, due, lastResult}
-let SETTINGS = { selectedLessons: LESSONS.map(l=>l.id), examDate:'2026-09-28', dailyNew:18, mode:'mixed', voiceRate:0.85 };
+let SETTINGS = { selectedLessons: LESSONS.map(l=>l.id), examDate:'2026-09-28', dailyNew:20, mode:'mixed', voiceRate:0.85 };
 
 async function loadAll(){
   try{
@@ -1157,24 +1157,29 @@ function getState(itemId){
   return PROGRESS[itemId];
 }
 
-// ---------- SRS 算法（简化版 SM-2） ----------
+// ---------- SRS 算法 ----------
+// 规则：答错 → 当天重练（错题优先出现）
+//       答对1次 → 10天后再出现
+//       连续答对2次 → 30天后再出现（基本掌握，大幅降低出现频率）
+//       连续答对3次以上 → 按 ease 因子继续拉长（理论上很少需要复习）
+// reps = 连续答对次数（答错归零）；lapses = 累计答错次数（不归零，用于错题优先排序）
 function reviewItem(itemId, correct){
   const st = getState(itemId);
   st.seen = true;
   if(correct){
-    st.reps += 1;
-    if(st.reps === 1) st.interval = 1;
-    else if(st.reps === 2) st.interval = 3;
-    else st.interval = Math.round(st.interval * st.ease);
-    st.ease = Math.min(2.9, st.ease + 0.04);
+    st.reps = (st.reps || 0) + 1;
+    if(st.reps === 1)      st.interval = 10;   // 答对1次：10天后
+    else if(st.reps === 2) st.interval = 30;   // 连续答对2次：30天后
+    else st.interval = Math.round(st.interval * Math.max(1.5, st.ease || 2.5)); // 之后按ease拉长
+    st.ease = Math.min(2.9, (st.ease || 2.5) + 0.04);
     st.due = addDays(todayStr(), st.interval);
     st.lastResult = 'right';
   } else {
-    st.reps = 0;
-    st.interval = 1;
-    st.ease = Math.max(1.3, st.ease - 0.22);
-    st.lapses = (st.lapses||0) + 1;
-    st.due = todayStr(); // 当天重练
+    st.reps = 0;              // 答错：连续答对计数归零
+    st.interval = 0;
+    st.ease = Math.max(1.3, (st.ease || 2.5) - 0.22);
+    st.lapses = (st.lapses || 0) + 1;
+    st.due = todayStr();      // 当天重练
     st.lastResult = 'wrong';
   }
   saveProgress();
@@ -1217,24 +1222,50 @@ function dueQueue(limit, kindFilter){
   let items = selectedItems();
   if(kindFilter) items = items.filter(it=>it.kind===kindFilter);
   const today = todayStr();
-  const due = [];
-  const fresh = [];
+  const due = [];      // 到期旧题（需要复习）
+  const fresh = [];    // 新词（从未练过）
+  const notYet = [];   // 未到期旧题（练过但还没到复习日，备用补位）
   items.forEach(it=>{
     const st = PROGRESS[it.id];
     if(st && (st.tooEasy || 0) >= 3) return; // 永久跳过
     if(st && st.seen){
       if(st.due <= today) due.push(it);
+      else notYet.push(it);  // 练过但未到期——题目不足时用来补位
     } else {
       fresh.push(it);
     }
   });
-  // 优先：错题多的 due 项 > 一般 due 项 > 新项（在所选课文之间轮流抽取，控制每日新词数量）
+
+  // 到期旧题：错题多的优先
   due.sort((a,b)=> (PROGRESS[b.id].lapses||0) - (PROGRESS[a.id].lapses||0));
-  fresh.sort((a,b)=> a.grade-b.grade || a.lessonNum - b.lessonNum || a.id.localeCompare(b.id));
+  // 新词：按课文顺序轮流抽取
+  fresh.sort((a,b)=> a.grade-b.grade || a.lessonNum-b.lessonNum || a.id.localeCompare(b.id));
+  // 未到期旧题：按到期日从近到远排（最快要到期的先出，减少对SRS节奏的干扰）
+  notYet.sort((a,b)=> PROGRESS[a.id].due.localeCompare(PROGRESS[b.id].due));
+
   const interleavedFresh = interleaveByLesson(fresh);
-  const newBudget = Math.max(0, SETTINGS.dailyNew);
-  const queue = due.concat(interleavedFresh.slice(0, newBudget));
-  // 完整随机打散（Fisher-Yates），让不同设备/不同次打开的题目顺序有明显差异
+  const sessionTarget = Math.max(6, SETTINGS.dailyNew);
+  const freshTarget = Math.round(sessionTarget * 2 / 3);
+  const dueTarget   = sessionTarget - freshTarget;
+
+  const freshSlice = interleavedFresh.slice(0, freshTarget);
+  const freshShortfall = freshTarget - freshSlice.length;
+  const dueSlice = due.slice(0, dueTarget + freshShortfall);
+  const dueShortfall = Math.max(0, dueTarget - dueSlice.length);
+  const extraFresh = interleavedFresh.slice(freshTarget, freshTarget + dueShortfall);
+
+  let queue = dueSlice.concat(freshSlice).concat(extraFresh);
+
+  // 如果 due + fresh 都不足，用未到期旧题补位，凑满 sessionTarget
+  // 这样即使所有词都练过了且未到期，学生每次仍能做到目标题数
+  if(queue.length < sessionTarget){
+    const shortfall = sessionTarget - queue.length;
+    const usedIds = new Set(queue.map(it=>it.id));
+    const padding = notYet.filter(it=>!usedIds.has(it.id)).slice(0, shortfall);
+    queue = queue.concat(padding);
+  }
+
+  // Fisher-Yates 打散
   for(let i=queue.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
     [queue[i],queue[j]]=[queue[j],queue[i]];
@@ -1694,7 +1725,7 @@ function openSettings(){
       <input type="date" id="examDateInput" value="${SETTINGS.examDate}" style="display:block;width:100%;padding:10px;margin-top:6px;border-radius:8px;border:1px solid var(--card-line);font-size:14px;">
     </div>
     <div style="margin-bottom:16px;">
-      <label style="font-size:13px;color:var(--ink-soft);">每日新学项目数量：<b id="dailyNewVal">${SETTINGS.dailyNew}</b></label>
+      <label style="font-size:13px;color:var(--ink-soft);">每次练习题数：<b id="dailyNewVal">${SETTINGS.dailyNew}</b>　<span style="font-size:11px;color:var(--border);">（新词约占2/3，复习旧词约1/3）</span></label>
       <input type="range" id="dailyNewInput" min="5" max="40" value="${SETTINGS.dailyNew}" style="width:100%;">
     </div>
     <div style="margin-bottom:16px;">
