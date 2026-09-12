@@ -98,6 +98,14 @@ h2.section-title{
 h2.section-title .tag{
   font-size:10.5px; background:var(--bamboo); color:#fff; padding:2px 8px; border-radius:20px; font-family:var(--sans); font-weight:600; letter-spacing:1px;
 }
+.section-collapse{margin:8px 0;}
+.section-collapse-hdr{
+  display:flex;justify-content:space-between;align-items:center;
+  cursor:pointer;padding:6px 2px;
+  border-bottom:1px solid var(--border);
+  user-select:none;
+}
+.section-collapse-hdr:active{opacity:.7;}
 
 /* ---------- Hero / Dashboard ---------- */
 .hero{
@@ -130,15 +138,32 @@ h2.section-title .tag{
 .btn-row{display:flex; gap:10px; margin-top:14px;}
 .btn[disabled]{opacity:0.4; cursor:not-allowed;}
 
-.mode-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;}
-.mode-card{
-  background:#FBF8F0; border:1.5px solid var(--card-line); border-radius:12px;
-  padding:14px 12px; cursor:pointer; text-align:left;
+.mode-section{margin-top:14px;}
+.mode-selected{
+  display:flex;justify-content:center;margin-bottom:16px;
 }
-.mode-card.active{border-color:var(--seal); background:#FCF1EC;}
-.mode-card .mi{font-size:22px;}
-.mode-card .mt{font-family:var(--serif); font-size:14.5px; margin-top:6px;}
-.mode-card .md{font-size:11px; color:var(--ink-soft); margin-top:2px; line-height:1.4;}
+.mode-badge{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  width:88px;height:88px;border-radius:50%;
+  background:var(--seal);color:#fff;cursor:pointer;
+  box-shadow:0 4px 16px rgba(192,57,43,.35);
+  transition:transform .18s ease, box-shadow .18s ease;
+  user-select:none;
+}
+.mode-badge:active{transform:scale(.93);}
+.mode-badge .mi{font-size:26px;line-height:1;}
+.mode-badge .mt{font-size:11px;margin-top:4px;font-family:var(--serif);letter-spacing:.5px;text-align:center;}
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.mode-card{
+  background:#FBF8F0;border:1.5px solid var(--card-line);border-radius:12px;
+  padding:10px 8px;cursor:pointer;text-align:left;
+  transition:opacity .15s, transform .15s;
+}
+.mode-card:active{transform:scale(.96);opacity:.8;}
+.mode-card-active{border-color:var(--seal)!important;background:#FCF1EC!important;}
+.mode-card .mi{font-size:18px;}
+.mode-card .mt{font-family:var(--serif);font-size:12.5px;margin-top:4px;}
+.mode-card .md{font-size:10px;color:var(--ink-soft);margin-top:2px;line-height:1.3;}
 
 /* ---------- Lesson picker ---------- */
 .lesson-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); gap:8px; margin-top:10px;}
@@ -1199,21 +1224,40 @@ function selectedItems(){
   return ITEMS.filter(it=>sel.has(it.lessonId));
 }
 function interleaveByLesson(items){
-  // 同一课内部保持原有顺序（如词语1再词语2），但在课与课之间轮流抽取，
-  // 避免新词额度被排在最前面的一课用完，导致后面选中的课文永远轮不到。
-  const byLesson = new Map();
-  const lessonOrder = [];
+  // 先按年级分组，再在年级内按课轮流，保证两个年级均匀出现
+  // 避免五年级20课 vs 六年级12课导致五年级新词占绝大多数的问题
+  const byGrade = new Map();
   items.forEach(it=>{
-    if(!byLesson.has(it.lessonId)){ byLesson.set(it.lessonId, []); lessonOrder.push(it.lessonId); }
-    byLesson.get(it.lessonId).push(it);
+    if(!byGrade.has(it.grade)) byGrade.set(it.grade, new Map());
+    const gradeMap = byGrade.get(it.grade);
+    if(!gradeMap.has(it.lessonId)) gradeMap.set(it.lessonId, []);
+    gradeMap.get(it.lessonId).push(it);
   });
+
+  // 每个年级内部轮流各课取一个
+  function drainGrade(gradeMap){
+    const lessonOrder = [...gradeMap.keys()];
+    const result = [];
+    let added = true;
+    while(added){
+      added = false;
+      for(const lid of lessonOrder){
+        const bucket = gradeMap.get(lid);
+        if(bucket && bucket.length){ result.push(bucket.shift()); added = true; }
+      }
+    }
+    return result;
+  }
+
+  const gradeQueues = [...byGrade.keys()].sort().map(g=>drainGrade(byGrade.get(g)));
+
+  // 年级间轮流：每次各年级各取一个，保证五六年级均匀
   const result = [];
   let added = true;
   while(added){
     added = false;
-    for(const lid of lessonOrder){
-      const bucket = byLesson.get(lid);
-      if(bucket.length){ result.push(bucket.shift()); added = true; }
+    for(const gq of gradeQueues){
+      if(gq.length){ result.push(gq.shift()); added = true; }
     }
   }
   return result;
@@ -1276,7 +1320,7 @@ function dueQueue(limit, kindFilter){
 // ---------- 统计 ----------
 function computeStats(){
   const items = selectedItems();
-  let mastered=0, learning=0, weak=0, untouched=0;
+  let mastered=0, learning=0, weak=0, untouched=0, errCount=0;
   let dueToday=0;
   const today = todayStr();
   items.forEach(it=>{
@@ -1286,12 +1330,12 @@ function computeStats(){
     else if(lvl===1) weak++;
     else if(lvl===2) learning++;
     else mastered++;
+    if(st && (st.lapses||0) > 0) errCount++;
     if(st && st.seen && st.due<=today) dueToday++;
-    else if(!st || !st.seen) { /* counted separately as new */ }
   });
   const total = items.length;
   const score = total ? Math.round((weak*0.3 + learning*0.6 + mastered*1.0) / total * 100) : 0;
-  return {total, mastered, learning, weak, untouched, dueToday, newCount: untouched, score};
+  return {total, mastered, learning, weak, untouched, dueToday, newCount: untouched, score, errCount};
 }
 function lessonStats(lessonId){
   const items = ITEMS.filter(it=>it.lessonId===lessonId);
@@ -1609,20 +1653,24 @@ function renderHome(){
         <div class="stat-box due"><div class="n">${stats.dueToday}</div><div class="l">待复习</div></div>
         <div class="stat-box"><div class="n">${stats.learning}</div><div class="l">学习中</div></div>
         <div class="stat-box mastered"><div class="n">${stats.mastered}</div><div class="l">已掌握</div></div>
-        <div class="stat-box"><div class="n">${stats.weak}</div><div class="l">易错</div></div>
+        <div class="stat-box" id="errStatBox" style="${stats.errCount>0?'cursor:pointer;':''}">
+          <div class="n" style="${stats.errCount>0?'color:var(--seal);':''}">${stats.errCount}</div>
+          <div class="l">错字本${stats.errCount>0?'↗':''}</div>
+        </div>
       </div>
+      ${stats.dueToday===0 && stats.mastered>0 ? `<div style="font-size:11px;color:var(--ink-soft);margin-top:8px;text-align:center;">✓ 今日到期词语已全部复习，继续练习会巩固未到期的词</div>` : ''}
       <button class="btn btn-primary btn-block" style="margin-top:20px;" onclick="startSession()">📝 开始今日复习</button>
     </div>
 
-    <h2 class="section-title">练习模式 <span class="tag">可多选混合</span></h2>
-    <div class="mode-grid" id="modeGrid"></div>
+    <h2 class="section-title">练习模式</h2>
+    <div class="mode-section" id="modeSection"></div>
 
     <h2 class="section-title">总体进度</h2>
     <div class="card"><div class="card-inner">
       <div class="bar-row"><div class="lbl">全部 ${stats.total} 项</div>
         <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
         <div class="bar-pct">${pct}%</div></div>
-      <div style="font-size:11.5px;color:var(--ink-soft);margin-top:6px;">学习进度综合了「学习中/易错/已掌握」各阶段，不是只看完全掌握的比例 · 已选 ${SETTINGS.selectedLessons.length} / ${LESSONS.length} 课 · 距考试还有 <b style="color:var(--seal)">${daysBetween(todayStr(),SETTINGS.examDate)}</b> 天</div>
+      <div style="font-size:11.5px;color:var(--ink-soft);margin-top:6px;">综合了「学习中/易错/已掌握」各阶段 · 已选 ${SETTINGS.selectedLessons.length} / ${LESSONS.length} 课 · 距考试还有 <b style="color:var(--seal)">${daysBetween(todayStr(),SETTINGS.examDate)}</b> 天</div>
     </div></div>
 
     <div class="btn-row">
@@ -1631,22 +1679,42 @@ function renderHome(){
     </div>
   `;
   const modes = [
-    {id:'mixed',    icon:'🎲', t:'综合混合',   d:'听写+填空+辨字+造句'},
-    {id:'word',     icon:'🖊️', t:'词语听写',   d:'听拼音写汉字'},
-    {id:'sentence', icon:'📜', t:'句子默写',   d:'挖空/整句默写'},
-    {id:'mcq',      icon:'🔍', t:'形近字辨析', d:'选出正确的字'},
-    {id:'sentmaking',icon:'✏️',t:'造句练习',   d:'用词语自由造句'},
-    {id:'dede',     icon:'的', t:'的地得专项', d:'专攻三个助词用法'},
-    {id:'pinyin',   icon:'拼', t:'拼音辨析',   d:'in / ing 等易混读音'},
+    {id:'mixed',     icon:'🎲', t:'综合混合',   d:'听写+填空+辨字+造句'},
+    {id:'word',      icon:'🖊️', t:'词语听写',   d:'听拼音写汉字'},
+    {id:'sentence',  icon:'📜', t:'句子默写',   d:'挖空/整句默写'},
+    {id:'mcq',       icon:'🔍', t:'形近字辨析', d:'选出正确的字'},
+    {id:'dede',      icon:'的', t:'的地得专项', d:'专攻三个助词用法'},
+    {id:'pinyin',    icon:'拼', t:'拼音辨析',   d:'in/ing等易混读音'},
   ];
-  const grid = document.getElementById('modeGrid');
-  grid.innerHTML = modes.map(m=>`
-    <div class="mode-card ${SETTINGS.mode===m.id?'active':''}" data-mode="${m.id}">
-      <div class="mi">${m.icon}</div><div class="mt">${m.t}</div><div class="md">${m.d}</div>
-    </div>`).join('');
-  grid.querySelectorAll('.mode-card').forEach(c=>{
-    c.addEventListener('click', ()=>{ SETTINGS.mode=c.dataset.mode; saveSettings(); renderHome(); });
+  const cur = modes.find(m=>m.id===SETTINGS.mode) || modes[0];
+  const sec = document.getElementById('modeSection');
+  sec.innerHTML = `
+    <div class="mode-selected">
+      <div class="mode-badge" id="modeBadge">
+        <div class="mi">${cur.icon}</div>
+        <div class="mt">${cur.t}</div>
+      </div>
+    </div>
+    <div class="mode-grid" id="modeGrid">
+      ${modes.map(m=>`
+        <div class="mode-card${m.id===cur.id?' mode-card-active':''}" data-mode="${m.id}">
+          <div class="mi">${m.icon}</div>
+          <div class="mt">${m.t}</div>
+          <div class="md">${m.d}</div>
+        </div>`).join('')}
+    </div>
+  `;
+  sec.querySelectorAll('.mode-card').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      if(c.dataset.mode === SETTINGS.mode) return; // 已选中，不重复渲染
+      c.style.transform='scale(.88) translateY(-6px)';
+      c.style.opacity='0';
+      setTimeout(()=>{ SETTINGS.mode=c.dataset.mode; saveSettings(); renderHome(); }, 160);
+    });
   });
+  if(stats.errCount>0){
+    document.getElementById('errStatBox').addEventListener('click', ()=>showScreen('stats'));
+  }
 }
 
 // ============ 选课文 ============
@@ -2316,50 +2384,80 @@ function renderSessionDone(noneToReview){
 }
 
 // ============ 错字本 / 统计页 ============
+function _collapseToggle(bodyId, chevronId, onOpen){
+  const body = document.getElementById(bodyId);
+  const chev = document.getElementById(chevronId);
+  const opening = body.style.display==='none';
+  body.style.display = opening ? 'block' : 'none';
+  chev.textContent = opening ? '▲ 收起' : '▼ 展开';
+  if(opening && onOpen) onOpen();
+}
 function renderStats(){
   const el = document.getElementById('screen-stats');
   const errItems = [];
   ITEMS.forEach(it=>{
     const st = PROGRESS[it.id];
-    if(st && (st.lapses||0) > 0){
-      errItems.push({it, lapses:st.lapses, lvl:masteryLevel(st)});
-    }
+    if(st && (st.lapses||0) > 0) errItems.push({it, lapses:st.lapses, lvl:masteryLevel(st)});
   });
   errItems.sort((a,b)=>b.lapses-a.lapses);
 
   el.innerHTML = `
-    <h2 class="section-title">📊 各课学习进度</h2>
-    <div class="card" style="margin-bottom:10px;"><div class="card-inner" style="font-size:12px;color:var(--ink-soft);line-height:1.7;">
-      💡 进度条反映「学习进度」：刚接触过算一部分，连续答对多次、间隔越拉越长才算「真正掌握」。
-      所以哪怕已经做了很多题，刚开始几天进度条也会比较低，这是间隔重复正常的过程，不代表没有学习记录。
-    </div></div>
-    <div class="card"><div class="card-inner" id="lessonBars"></div></div>
-    <h2 class="section-title">🔴 错字本 <span class="tag">${errItems.length} 项</span></h2>
-    ${errItems.length===0? `<div class="empty-state"><div class="ei">✨</div>还没有错题记录，继续加油！</div>` :
-    `<div class="error-list">${errItems.slice(0,60).map(e=>`
-      <div class="error-item">
-        <div>
-          <div class="w">${e.it.kind==='word'? e.it.text : (e.it.focus||e.it.full.slice(0,10)+'…')}</div>
-          <div class="meta">${e.it.grade}年级第${e.it.lessonNum}课 · ${e.it.kind==='word'?'词语':'句子'}</div>
-        </div>
-        <span class="lapses">错${e.lapses}次</span>
-      </div>`).join('')}</div>`}
+    <!-- 错字本（默认展开） -->
+    <div class="section-collapse-hdr" id="errHdr2" style="cursor:pointer;">
+      <h2 class="section-title" style="margin:0;">🔴 错字本 <span class="tag">${errItems.length} 项</span></h2>
+      <span id="errChev2" style="font-size:12px;color:var(--ink-soft);">▲ 收起</span>
+    </div>
+    <div id="errBody2">
+      ${errItems.length===0
+        ? `<div class="empty-state"><div class="ei">✨</div>还没有错题记录，继续加油！</div>`
+        : `<div class="error-list">${errItems.slice(0,60).map(e=>`
+            <div class="error-item">
+              <div>
+                <div class="w">${e.it.kind==='word'?e.it.text:(e.it.focus||e.it.full.slice(0,10)+'…')}</div>
+                <div class="meta">${e.it.grade}年级第${e.it.lessonNum}课·${e.it.kind==='word'?'词语':'句子'}</div>
+              </div>
+              <span class="lapses">错${e.lapses}次</span>
+            </div>`).join('')}</div>`}
+    </div>
+
+    <!-- 各课进度（默认折叠） -->
+    <div class="section-collapse-hdr" id="progressHdr2" style="cursor:pointer;margin-top:16px;">
+      <h2 class="section-title" style="margin:0;">📊 各课学习进度</h2>
+      <span id="progressChev2" style="font-size:12px;color:var(--ink-soft);">▼ 展开</span>
+    </div>
+    <div id="progressBody2" style="display:none;">
+      <div class="card" style="margin-bottom:10px;"><div class="card-inner" style="font-size:12px;color:var(--ink-soft);line-height:1.7;">
+        💡 连续答对1次→10天后复习，连续答对2次→30天后复习。进度条越高表示复习间隔越长、掌握越稳。
+      </div></div>
+      <div class="card"><div class="card-inner" id="lessonBars"></div></div>
+    </div>
 
     <h2 class="section-title">📝 易错提示笔记</h2>
     <div class="card"><div class="card-inner" id="tipsArea"></div></div>
   `;
-  const bars = document.getElementById('lessonBars');
-  bars.innerHTML = LESSONS.map(l=>{
-    const s = lessonStats(l.id);
-    const caption = s.touched===0 ? '尚未开始'
-      : `已学 ${s.touched}/${s.total} 题${s.mastered>0?` · 已掌握 ${s.mastered} 题`:''}`;
-    return `<div style="margin-bottom:10px;">
-      <div class="bar-row" style="margin-bottom:2px;"><div class="lbl">${l.grade}年-${l.lesson}课</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${s.score}%"></div></div>
-        <div class="bar-pct">${s.score}%</div></div>
-      <div style="margin-left:82px;font-size:10.5px;color:var(--ink-soft);">${caption}</div>
-    </div>`;
-  }).join('');
+  // 折叠事件绑定
+  document.getElementById('errHdr2').addEventListener('click', ()=>{
+    _collapseToggle('errBody2','errChev2', null);
+  });
+  function renderLessonBars(){
+    const bars = document.getElementById('lessonBars');
+    if(!bars || bars.dataset.rendered) return;
+    bars.dataset.rendered = '1';
+    bars.innerHTML = LESSONS.map(l=>{
+      const s = lessonStats(l.id);
+      const caption = s.touched===0 ? '尚未开始'
+        : `已学 ${s.touched}/${s.total} 题${s.mastered>0?` · 已掌握 ${s.mastered} 题`:''}`;
+      return `<div style="margin-bottom:10px;">
+        <div class="bar-row" style="margin-bottom:2px;"><div class="lbl">${l.grade}年-${l.lesson}课</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${s.score}%"></div></div>
+          <div class="bar-pct">${s.score}%</div></div>
+        <div style="margin-left:82px;font-size:10.5px;color:var(--ink-soft);">${caption}</div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('progressHdr2').addEventListener('click', ()=>{
+    _collapseToggle('progressBody2','progressChev2', renderLessonBars);
+  });
 
   const tipsArea = document.getElementById('tipsArea');
   tipsArea.innerHTML = `<div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">
