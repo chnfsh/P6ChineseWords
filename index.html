@@ -1203,29 +1203,40 @@ function getState(itemId){
   return PROGRESS[itemId];
 }
 
-// ---------- SRS 算法 ----------
-// 规则：答错 → 当天重练（错题优先出现）
-//       答对1次 → 10天后再出现
-//       连续答对2次 → 30天后再出现（基本掌握，大幅降低出现频率）
-//       连续答对3次以上 → 按 ease 因子继续拉长（理论上很少需要复习）
-// reps = 连续答对次数（答错归零）；lapses = 累计答错次数（不归零，用于错题优先排序）
+// ---------- SRS 算法（记忆曲线版） ----------
+// 规则：
+//   答对第1次 → 1天后复习
+//   答对第2次 → 3天后复习
+//   答对第3次 → 7天后复习
+//   答对第4次 → ✅ 掌握，永久退出练习队列（仍可在词库查看）
+//   任意一次答错 → 归零（reps=0），当天重练，错题优先
+// reps = 当前连续答对次数（答错立即归零）
+// lapses = 累计答错次数（永不归零，用于错题优先排序）
+// mastered = true 表示已达到第4次答对，永久退出队列
+const SRS_INTERVALS = [0, 1, 3, 7]; // 第1/2/3次答对后的间隔天数
+
 function reviewItem(itemId, correct){
   const st = getState(itemId);
   st.seen = true;
   if(correct){
     st.reps = (st.reps || 0) + 1;
-    if(st.reps === 1)      st.interval = 10;   // 答对1次：10天后
-    else if(st.reps === 2) st.interval = 30;   // 连续答对2次：30天后
-    else st.interval = Math.round(st.interval * Math.max(1.5, st.ease || 2.5)); // 之后按ease拉长
-    st.ease = Math.min(2.9, (st.ease || 2.5) + 0.04);
-    st.due = addDays(todayStr(), st.interval);
+    if(st.reps >= 4){
+      // 第4次答对：正式掌握，永久退出队列
+      st.mastered = true;
+      st.due = '9999-12-31';
+      st.interval = 9999;
+    } else {
+      st.interval = SRS_INTERVALS[st.reps] || 1;
+      st.due = addDays(todayStr(), st.interval);
+    }
     st.lastResult = 'right';
   } else {
-    st.reps = 0;              // 答错：连续答对计数归零
+    // 任意一次答错：归零
+    st.reps = 0;
+    st.mastered = false;
     st.interval = 0;
-    st.ease = Math.max(1.3, (st.ease || 2.5) - 0.22);
     st.lapses = (st.lapses || 0) + 1;
-    st.due = todayStr();      // 当天重练
+    st.due = todayStr();
     st.lastResult = 'wrong';
   }
   saveProgress();
@@ -1233,10 +1244,10 @@ function reviewItem(itemId, correct){
 
 function masteryLevel(st){
   if(!st || !st.seen) return 0;
-  if(st.lapses>0 && st.reps<2) return 1; // 易错
-  if(st.reps>=4) return 3; // 熟练
-  if(st.reps>=1) return 2; // 学习中
-  return 1;
+  if(st.mastered) return 4;      // 已掌握（4次全对）
+  if((st.reps||0) >= 3) return 3; // 第3次答对，即将掌握
+  if((st.reps||0) >= 1) return 2; // 学习中
+  return 1;                        // 见过但答错过/待复习
 }
 
 // ---------- 队列构建 ----------
@@ -1292,7 +1303,8 @@ function dueQueue(limit, kindFilter){
   const notYet = [];   // 未到期旧题（练过但还没到复习日，备用补位）
   items.forEach(it=>{
     const st = PROGRESS[it.id];
-    if(st && (st.tooEasy || 0) >= 3) return; // 永久跳过
+    if(st && (st.tooEasy || 0) >= 3) return; // 永久跳过（太简单了）
+    if(st && st.mastered) return;             // 已掌握（4次全对），永久退出队列
     if(st && st.seen){
       if(st.due <= today) due.push(it);
       else notYet.push(it);  // 练过但未到期——题目不足时用来补位
@@ -1346,13 +1358,13 @@ function computeStats(){
   const today = todayStr();
   items.forEach(it=>{
     const st = PROGRESS[it.id];
-    const lvl = masteryLevel(st);
-    if(lvl===0) untouched++;
-    else if(lvl===1) weak++;
-    else if(lvl===2) learning++;
-    else mastered++;
+    if(!st || !st.seen){ untouched++; }
+    else if(st.mastered){ mastered++; }
+    else if((st.reps||0) >= 3){ learning++; }  // 第3遍，即将掌握
+    else if((st.reps||0) >= 1){ learning++; }   // 学习中
+    else { weak++; }                             // 见过但归零/待复习
     if(st && (st.lapses||0) > 0) errCount++;
-    if(st && st.seen && st.due<=today) dueToday++;
+    if(st && st.seen && !st.mastered && st.due<=today) dueToday++;
   });
   const total = items.length;
   const score = total ? Math.round((weak*0.3 + learning*0.6 + mastered*1.0) / total * 100) : 0;
@@ -2029,7 +2041,20 @@ function renderCard(){
 }
 
 function lessonTagHTML(it){
-  return `<div class="lesson-tag">${it.grade}年级 第${it.lessonNum}课 <b>《${it.lessonTitle}》</b></div>`;
+  const st = PROGRESS[it.id];
+  const reps = st ? (st.reps || 0) : 0;
+  const mastered = st && st.mastered;
+  // 第N遍标签：显示当前是第几遍（答对后reps已递增，所以+1显示"下一遍"目标更直观）
+  // 用"第N遍"表示"已连续答对N次"，0次=初学
+  let repLabel = '';
+  if(mastered){
+    repLabel = `<span style="margin-left:6px;font-size:10px;background:#4a7c59;color:#fff;padding:1px 7px;border-radius:10px;">✅ 已掌握</span>`;
+  } else if(reps > 0){
+    repLabel = `<span style="margin-left:6px;font-size:10px;background:var(--bamboo);color:#fff;padding:1px 7px;border-radius:10px;">第${reps}遍 ✓ → 还需${4-reps}次</span>`;
+  } else {
+    repLabel = `<span style="margin-left:6px;font-size:10px;color:var(--ink-soft);">初学</span>`;
+  }
+  return `<div class="lesson-tag">${it.grade}年级 第${it.lessonNum}课 <b>《${it.lessonTitle}》</b>${repLabel}</div>`;
 }
 
 // ---------- 词语听写卡 ----------
