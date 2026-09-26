@@ -98,6 +98,14 @@ h2.section-title{
 h2.section-title .tag{
   font-size:10.5px; background:var(--bamboo); color:#fff; padding:2px 8px; border-radius:20px; font-family:var(--sans); font-weight:600; letter-spacing:1px;
 }
+.section-collapse{margin:8px 0;}
+.section-collapse-hdr{
+  display:flex;justify-content:space-between;align-items:center;
+  cursor:pointer;padding:6px 2px;
+  border-bottom:1px solid var(--border);
+  user-select:none;
+}
+.section-collapse-hdr:active{opacity:.7;}
 
 /* ---------- Hero / Dashboard ---------- */
 .hero{
@@ -130,15 +138,53 @@ h2.section-title .tag{
 .btn-row{display:flex; gap:10px; margin-top:14px;}
 .btn[disabled]{opacity:0.4; cursor:not-allowed;}
 
-.mode-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;}
-.mode-card{
-  background:#FBF8F0; border:1.5px solid var(--card-line); border-radius:12px;
-  padding:14px 12px; cursor:pointer; text-align:left;
+.mode-section{margin-top:14px;}
+/* 胶囊组合 */
+.mode-capsule-wrap{display:flex;justify-content:center;margin:18px 0 0;}
+.mode-capsule{
+  display:flex;align-items:center;
+  border-radius:999px;overflow:hidden;
+  box-shadow:0 2px 10px rgba(26,20,16,.1), 0 4px 20px rgba(26,20,16,.06);
 }
-.mode-card.active{border-color:var(--seal); background:#FCF1EC;}
-.mode-card .mi{font-size:22px;}
-.mode-card .mt{font-family:var(--serif); font-size:14.5px; margin-top:6px;}
-.mode-card .md{font-size:11px; color:var(--ink-soft); margin-top:2px; line-height:1.4;}
+.mode-capsule-circle{
+  width:62px;height:62px;flex-shrink:0;
+  background:var(--seal);color:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;user-select:none;
+  transition:filter .15s;
+  position:relative;z-index:1;
+  box-shadow:2px 0 8px rgba(192,57,43,.2);
+}
+.mode-capsule-circle:active{filter:brightness(.88);}
+.mode-capsule-circle .mi{font-size:18px;line-height:1;}
+.mode-capsule-circle .mt{font-size:9px;margin-top:2px;font-family:var(--serif);letter-spacing:.5px;}
+.mode-capsule-bar{
+  height:62px;padding:0 20px;
+  background:var(--warm);color:var(--ink);
+  border:none;cursor:pointer;
+  font-size:15px;font-weight:700;font-family:var(--serif);letter-spacing:3px;
+  white-space:nowrap;
+  transition:filter .15s;
+  box-shadow:inset 2px 0 5px rgba(26,20,16,.05);
+}
+.mode-capsule-bar:active{filter:brightness(.95);}
+/* 选择提示 */
+.mode-choose-label{
+  text-align:center;font-size:11px;color:var(--ink-soft);
+  letter-spacing:1px;margin:14px 0 10px;
+}
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.mode-card{
+  background:#FBF8F0;border:1.5px solid var(--card-line);border-radius:12px;
+  padding:10px 8px;cursor:pointer;text-align:left;
+  transition:transform .18s ease, box-shadow .18s ease, opacity .15s;
+}
+.mode-card:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(26,20,16,.09);}
+.mode-card:active{transform:scale(.95) translateY(-1px);opacity:.8;}
+.mode-card-active{border-color:var(--seal)!important;background:#FCF1EC!important;}
+.mode-card .mi{font-size:18px;}
+.mode-card .mt{font-family:var(--serif);font-size:12.5px;margin-top:4px;}
+.mode-card .md{font-size:10px;color:var(--ink-soft);margin-top:2px;line-height:1.3;}
 
 /* ---------- Lesson picker ---------- */
 .lesson-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); gap:8px; margin-top:10px;}
@@ -182,8 +228,8 @@ h2.section-title .tag{
 
 /* canvas writing area */
 .write-zone{margin-top:18px; position:relative;}
-.grid-cells{display:flex; justify-content:center; gap:6px; flex-wrap:wrap;}
-.cell{position:relative; width:78px; height:78px; flex-shrink:0;}
+.grid-cells{display:flex; justify-content:center; gap:8px; flex-wrap:wrap;}
+.cell{position:relative; flex-shrink:0;}
 .cell canvas{position:absolute; inset:0; width:100%; height:100%; touch-action:none;}
 .cell .guide{background:#fff; border:1.5px solid var(--grid-line); border-radius:6px;}
 .lined-area{position:relative; width:100%; max-width:520px; height:170px; margin:0 auto; background:#fff; border:1.5px solid var(--card-line); border-radius:8px; overflow:hidden;}
@@ -295,7 +341,6 @@ textarea.tip-edit{
 .screen.active{display:block;}
 
 @media (max-width:380px){
-  .cell{width:64px; height:64px;}
   .hero .big-num{font-size:44px;}
 }
 </style>
@@ -557,7 +602,7 @@ const LESSONS = [
  ],
  sentences:[
   {t:"他不仅有学问，而且十分聪明。",f:"不仅"},
-  {t:"他停下脚步看了一会儿，叹了一口气。",f:"叹气"},
+  {t:"他停下脚步看了一会儿，叹了一口气。",f:"叹"},
   {t:"杨修笑了笑，胸有成竹地说把门改窄一些就行了。",f:"胸有成竹"},
   {t:"众人听了，有的相信，有的怀疑。",f:"怀疑",moxie:true},
   {t:"众人听了恍然大悟，都很佩服杨修。",f:"恍然大悟",moxie:true},
@@ -572,7 +617,7 @@ const LESSONS = [
   {w:"不约而同",p:"bù yuē ér tóng"},{w:"默默祈祷",p:"mò mò qí dǎo"},{w:"偏偏",p:"piān piān"}
  ],
  sentences:[
-  {t:"我并不知道自己犯了什么错误。",f:"并"},
+  {t:"我并不知道自己犯了什么错误。",f:"错误"},
   {t:"满肚子的委屈涌上心头，我趴在桌子上哭了起来。",f:"委屈"},
   {t:"我感到脸上发烫，额头直冒汗，恨不得找个地洞钻进去！",f:"发烫"},
   {t:"老师温柔地说：「凡是你会回答的，就举右手。」",f:"温柔"},
@@ -625,6 +670,91 @@ const LESSONS = [
   {t:"这里有一座座高大的建筑，远看就像起伏的山峰。",f:"起伏",moxie:true},
   {t:"宏伟壮观的金字塔，体现了古埃及人民的智慧。",f:"智慧",moxie:true}
  ], tips:[]},
+
+{id:"g5-18", grade:5, lesson:18, title:"5A词语搭配",
+ words:[
+  {w:"野外探险",p:"yě wài tàn xiǎn"},{w:"活动安排",p:"huó dòng ān pái"},{w:"防止意外",p:"fáng zhǐ yì wài"},
+  {w:"单独行动",p:"dān dú xíng dòng"},{w:"贵重物品",p:"guì zhòng wù pǐn"},{w:"禁止吸烟",p:"jìn zhǐ xī yān"},
+  {w:"竞赛规则",p:"jìng sài guī zé"},{w:"互相配合",p:"hù xiāng pèi hé"},{w:"风中摇摆",p:"fēng zhōng yáo bǎi"},
+  {w:"假期充实",p:"jià qī chōng shí"},{w:"正确答案",p:"zhèng què dá àn"},{w:"填写表格",p:"tián xiě biǎo gé"},
+  {w:"昏暗的角落",p:"hūn àn de jiǎo luò"},{w:"灯光明亮",p:"dēng guāng míng liàng"},{w:"保持距离",p:"bǎo chí jù lí"},
+  {w:"户外活动",p:"hù wài huó dòng"},{w:"检查视力",p:"jiǎn chá shì lì"},{w:"连续工作",p:"lián xù gōng zuò"},
+  {w:"照顾自己",p:"zhào gù zì jǐ"},{w:"光线充足",p:"guāng xiàn chōng zú"},{w:"迷上游戏",p:"mí shàng yóu xì"},
+  {w:"盯着屏幕",p:"dīng zhe píng mù"},{w:"改掉坏习惯",p:"gǎi diào huài xí guàn"},{w:"视力下降",p:"shì lì xià jiàng"},
+  {w:"准备材料",p:"zhǔn bèi cái liào"},{w:"低头沉默",p:"dī tóu chén mò"},{w:"犯错误",p:"fàn cuò wù"},
+  {w:"养育子女",p:"yǎng yù zǐ nǚ"},{w:"爱惜身体",p:"ài xī shēn tǐ"},{w:"安慰朋友",p:"ān wèi péng yǒu"},
+  {w:"生日贺卡",p:"shēng rì hè kǎ"},{w:"捐出食物",p:"juān chū shí wù"},{w:"确保新鲜",p:"què bǎo xīn xiān"},
+  {w:"互不来往",p:"hù bù lái wǎng"},{w:"拒绝开门",p:"jù jué kāi mén"},{w:"觉得奇怪",p:"jué de qí guài"},
+  {w:"引来围观",p:"yǐn lái wéi guān"},{w:"缺少食物",p:"quē shǎo shí wù"},{w:"一叠钞票",p:"yī dié chāo piào"},
+  {w:"捡到手机",p:"jiǎn dào shǒu jī"},{w:"停下脚步",p:"tíng xià jiǎo bù"},{w:"大声求救",p:"dà shēng qiú jiù"},
+  {w:"搭帐篷",p:"dā zhàng peng"},{w:"放松心情",p:"fàng sōng xīn qíng"},{w:"送上祝福",p:"sòng shàng zhù fú"},
+  {w:"转身离开",p:"zhuǎn shēn lí kāi"},{w:"闪闪发光",p:"shǎn shǎn fā guāng"},{w:"一束鲜花",p:"yī shù xiān huā"},
+  {w:"查看日期",p:"chá kàn rì qī"},{w:"新鲜蔬菜",p:"xīn xiān shū cài"},{w:"味道鲜美",p:"wèi dào xiān měi"},
+  {w:"发人深思",p:"fā rén shēn sī"},{w:"充满花香",p:"chōng mǎn huā xiāng"},{w:"身体摇晃",p:"shēn tǐ yáo huàng"},
+  {w:"傻傻站着",p:"shǎ shǎ zhàn zhe"},{w:"上前阻拦",p:"shàng qián zǔ lán"},{w:"伤透脑筋",p:"shāng tòu nǎo jīn"},
+  {w:"等待登机",p:"děng dài dēng jī"},{w:"乱发脾气",p:"luàn fā pí qì"},{w:"喷出水柱",p:"pēn chū shuǐ zhù"},
+  {w:"浮出水面",p:"fú chū shuǐ miàn"},{w:"聚在一起",p:"jù zài yī qǐ"},{w:"围成一圈",p:"wéi chéng yī quān"},
+  {w:"无意间看到",p:"wú yì jiān kàn dào"},{w:"急得团团转",p:"jí de tuán tuán zhuàn"},{w:"衣服湿透",p:"yī fu shī tòu"},
+  {w:"激动欢呼",p:"jī dòng huān hū"},{w:"挥手道别",p:"huī shǒu dào bié"},{w:"空中漂浮",p:"kōng zhōng piāo fú"},
+  {w:"伸懒腰",p:"shēn lǎn yāo"},{w:"想出办法",p:"xiǎng chū bàn fǎ"},{w:"爽快答应",p:"shuǎng kuài dā ying"},
+  {w:"梦想实现",p:"mèng xiǎng shí xiàn"},{w:"动物灭绝",p:"dòng wù miè jué"},{w:"留下足迹",p:"liú xià zú jì"},
+  {w:"发明手机",p:"fā míng shǒu jī"},{w:"制造电脑",p:"zhì zào diàn nǎo"},{w:"浮现在脑海里",p:"fú xiàn zài nǎo hǎi lǐ"},
+  {w:"节省时间",p:"jié shěng shí jiān"},{w:"珍惜时间",p:"zhēn xī shí jiān"},{w:"毫不犹豫",p:"háo bù yóu yù"},
+  {w:"增添乐趣",p:"zēng tiān lè qù"},{w:"观看电影",p:"guān kàn diàn yǐng"},{w:"凭票领取",p:"píng piào lǐng qǔ"},
+  {w:"接到命令",p:"jiē dào mìng lìng"},{w:"打败敌人",p:"dǎ bài dí rén"},{w:"回到家乡",p:"huí dào jiā xiāng"},
+  {w:"了不起的英雄",p:"liǎo bu qǐ de yīng xióng"},{w:"分配角色",p:"fēn pèi jué sè"},{w:"设计海报",p:"shè jì hǎi bào"},
+  {w:"洪水淹没",p:"hóng shuǐ yān mò"},{w:"冒着危险",p:"mào zhe wēi xiǎn"},{w:"安排好时间",p:"ān pái hǎo shí jiān"},
+  {w:"利用好时间",p:"lì yòng hǎo shí jiān"}
+ ],
+ sentences:[], tips:[]},
+{id:"g5-19", grade:5, lesson:19, title:"5B词语搭配",
+ words:[
+  {w:"网络平台",p:"wǎng luò píng tái"},{w:"控制自己",p:"kòng zhì zì jǐ"},{w:"不停唠叨",p:"bù tíng láo dao"},
+  {w:"童年往事",p:"tóng nián wǎng shì"},{w:"丰盛午餐",p:"fēng shèng wǔ cān"},{w:"鼻子一酸",p:"bí zi yī suān"},
+  {w:"感到惭愧",p:"gǎn dào cán kuì"},{w:"学会感恩",p:"xué huì gǎn ēn"},{w:"辛苦工作",p:"xīn kǔ gōng zuò"},
+  {w:"认真对待",p:"rèn zhēn duì dài"},{w:"良好品格",p:"liáng hǎo pǐn gé"},{w:"优秀学业",p:"yōu xiù xué yè"},
+  {w:"为校争光",p:"wèi xiào zhēng guāng"},{w:"舒展身体",p:"shū zhǎn shēn tǐ"},{w:"基本知识",p:"jī běn zhī shi"},
+  {w:"人数有限",p:"rén shù yǒu xiàn"},{w:"详细情况",p:"xiáng xì qíng kuàng"},{w:"不顾一切",p:"bù gù yī qiè"},
+  {w:"一溜烟地跑",p:"yī liù yān de pǎo"},{w:"赢得奖项",p:"yíng dé jiǎng xiàng"},{w:"旅游手册",p:"lǚ yóu shǒu cè"},
+  {w:"宽阔舞台",p:"kuān kuò wǔ tái"},{w:"表演队伍",p:"biǎo yǎn duì wu"},{w:"激动人心",p:"jī dòng rén xīn"},
+  {w:"天色渐暗",p:"tiān sè jiàn àn"},{w:"精彩节目",p:"jīng cǎi jié mù"},{w:"献上祝福",p:"xiàn shàng zhù fú"},
+  {w:"欢乐气氛",p:"huān lè qì fēn"},{w:"推向高潮",p:"tuī xiàng gāo cháo"},{w:"密切关系",p:"mì qiè guān xi"},
+  {w:"点燃希望",p:"diǎn rán xī wàng"},{w:"繁华城市",p:"fán huá chéng shì"},{w:"产生影响",p:"chǎn shēng yǐng xiǎng"},
+  {w:"根据统计",p:"gēn jù tǒng jì"},{w:"独特艺术",p:"dú tè yì shù"},{w:"建造花园",p:"jiàn zào huā yuán"},
+  {w:"十分满意",p:"shí fēn mǎn yì"},{w:"探索世界",p:"tàn suǒ shì jiè"},{w:"创造文字",p:"chuàng zào wén zì"},
+  {w:"遇到困难",p:"yù dào kùn nán"},{w:"耐心教导",p:"nài xīn jiào dǎo"},{w:"加倍努力",p:"jiā bèi nǔ lì"},
+  {w:"积极训练",p:"jī jí xùn liàn"},{w:"了解情况",p:"liǎo jiě qíng kuàng"},{w:"打工赚钱",p:"dǎ gōng zhuàn qián"},
+  {w:"视线模糊",p:"shì xiàn mó hu"},{w:"相处愉快",p:"xiāng chǔ yú kuài"},{w:"栽种树木",p:"zāi zhòng shù mù"},
+  {w:"宽阔道路",p:"kuān kuò dào lù"},{w:"散发香味",p:"sàn fā xiāng wèi"},{w:"粗壮枝条",p:"cū zhuàng zhī tiáo"},
+  {w:"挺直身体",p:"tǐng zhí shēn tǐ"},{w:"串串果实",p:"chuàn chuàn guǒ shí"},{w:"撑开大伞",p:"chēng kāi dà sǎn"},
+  {w:"冬暖夏凉",p:"dōng nuǎn xià liáng"},{w:"传统建筑",p:"chuán tǒng jiàn zhù"},{w:"减少伤亡",p:"jiǎn shǎo shāng wáng"},
+  {w:"攻击敌人",p:"gōng jī dí rén"},{w:"避开野兽",p:"bì kāi yě shòu"},{w:"环境恶劣",p:"huán jìng è liè"},
+  {w:"体形矮小",p:"tǐ xíng ǎi xiǎo"},{w:"获取食物",p:"huò qǔ shí wù"},{w:"衣服宽大",p:"yī fu kuān dà"},
+  {w:"交通工具",p:"jiāo tōng gōng jù"},{w:"发生变化",p:"fā shēng biàn huà"},{w:"到达目的地",p:"dào dá mù dì dì"},
+  {w:"惊喜发现",p:"jīng xǐ fā xiàn"},{w:"细心寻找",p:"xì xīn xún zhǎo"},{w:"记录资料",p:"jì lù zī liào"},
+  {w:"挥手告别",p:"huī shǒu gào bié"},{w:"独特感受",p:"dú tè gǎn shòu"},{w:"互相对照",p:"hù xiāng duì zhào"},
+  {w:"默默守护",p:"mò mò shǒu hù"},{w:"吸引游客",p:"xī yǐn yóu kè"}
+ ],
+ sentences:[], tips:[]},
+
+// 补充易错词单元：收录学生反映较难掌握的词语，通过SRS高频复习巩固
+{id:"g5-20", grade:5, lesson:20, title:"补充易错词",
+ words:[
+  {w:"武功",p:"wǔ gōng"},{w:"旋转",p:"xuán zhuǎn"},{w:"观察",p:"guān chá"},
+  {w:"咳嗽",p:"ké sou"},{w:"雪糕",p:"xuě gāo"},{w:"射击",p:"shè jī"},
+  {w:"螃蟹",p:"páng xiè"},{w:"特权",p:"tè quán"},{w:"迎面走来",p:"yíng miàn zǒu lái"},
+  {w:"后悔",p:"hòu huǐ"},{w:"抓耳挠腮",p:"zhuā ěr náo sāi"},{w:"敲打",p:"qiāo dǎ"},
+  {w:"玻璃窗",p:"bō li chuāng"},{w:"攀岩",p:"pān yán"},{w:"黑眼圈",p:"hēi yǎn quān"},
+  {w:"妖魔",p:"yāo mó"},{w:"捧着鲜花",p:"pěng zhe xiān huā"},
+  {w:"戴帽子",p:"dài mào zi"},{w:"阅读",p:"yuè dú"},{w:"纷纷离开",p:"fēn fēn lí kāi"},
+  {w:"模型",p:"mó xíng"},{w:"到达终点",p:"dào dá zhōng diǎn"},{w:"播放乐曲",p:"bō fàng yuè qǔ"},
+  {w:"饮料",p:"yǐn liào"},{w:"理睬",p:"lǐ cǎi"},{w:"随手",p:"suí shǒu"},
+  {w:"塑料",p:"sù liào"},{w:"地铁",p:"dì tiě"},{w:"一段时间",p:"yī duàn shí jiān"},
+  {w:"咳嗽",p:"ké sou"},{w:"洗漱",p:"xǐ shù"},
+  {w:"拼音",p:"pīn yīn"},{w:"井水",p:"jǐng shuǐ"},{w:"安静",p:"ān jìng"},
+  {w:"并且",p:"bìng qiě"},{w:"安宁",p:"ān níng"},{w:"星星",p:"xīng xīng"}
+ ],
+ sentences:[], tips:[]},
 
 // ============ 六年级 ============
 {id:"g6-1", grade:6, lesson:1, title:"加油！加油！",
@@ -845,7 +975,85 @@ const CONFUSABLES = [
  {lessonId:"g5-13", sentence:"杨修笑了笑，胸有成竹地说把门改窄一些就行了。", blank:"窄", options:["窄","窝","穿","空"], note:"窄＝穴字头+乍，注意和「穿、空」等穴字头字区分"},
  {lessonId:"g5-9", sentence:"她代替父亲去打仗，保家卫国，是一位女英雄。", blank:"替", options:["替","潜","赞","昔"], note:"代替的替，上面是两个「夫」字"},
  {lessonId:"g5-2", sentence:"我把这一切都抛到了脑后。", blank:"抛", options:["抛","炮","泡","抱"], note:"抛＝扌+九+力"},
- {lessonId:"g6-11", sentence:"罗伯特毫不迟疑，立刻签下合约，笑嘻嘻地离开了。", blank:"疑", options:["疑","凝","拟","疏"], note:"迟疑的疑，左边不是矢"}
+ {lessonId:"g6-11", sentence:"罗伯特毫不迟疑，立刻签下合约，笑嘻嘻地离开了。", blank:"疑", options:["疑","凝","拟","疏"], note:"迟疑的疑，左边不是矢"},
+ {lessonId:"g5-19", sentence:"她虽然年纪小，成绩却很优秀，是班上的模范生。", blank:"优", options:["优","忧","犹","扰"], note:"都含「尤」：优＝亻+尤，优秀；忧＝忄+尤，忧愁；犹＝犭+尤，犹豫；扰＝扌+尤，打扰"},
+ {lessonId:"g5-19", sentence:"老师对待每一位学生都很有耐心，从不偏心。", blank:"待", options:["待","特","诗","寺"], note:"都以「寺」做声旁：待＝彳+寺，对待/等待；特＝牛+寺，特别；诗＝讠+寺，诗歌；寺单独成字，如寺庙"},
+
+ // ── 「的、地、得」专项辨析 ──
+ // 规则口诀：名词前用"的"（美丽的花），动词/形容词前用"地"（快乐地跑），动词后描述结果程度用"得"（跑得很快）
+ {lessonId:"g5-1", sentence:"清凉__海风吹来，高大的椰树轻轻摇摆，阵阵的海浪在我们耳边低声__歌唱。", blank:"的、地", options:["的、地","地、的","得、地","的、得"], note:"①清凉的海风——名词前用「的」；②低声地歌唱——动词前用「地」"},
+ {lessonId:"g5-1", sentence:"他高兴__跳了起来，脸上露出了灿烂__笑容，真__让人羡慕！", blank:"地、的、的", options:["地、的、的","地、的、得","的、得、地","的、地、的"], note:"①高兴地跳——动词前用「地」；②灿烂的笑容——名词前修饰语用「的」；③真的让人羡慕——「的」作语气助词，表示强调肯定"},
+ {lessonId:"g5-2", sentence:"你不但坐__直直的，而且还让我和书本保持一定__距离。", blank:"得、的", options:["得、的","的、得","地、的","得、地"], note:"①坐得直直的——动词后接结果补语用「得」；②一定的距离——名词前用「的」"},
+ {lessonId:"g5-3", sentence:"有的同学还神气十足__左顾右盼。", blank:"地", options:["的","地","得","着"], note:"动作（左顾右盼）前的修饰语用「地」：神气十足地左顾右盼"},
+ {lessonId:"g5-3", sentence:"妈妈苦口婆心__劝他，他还是一副满不在乎__样子。", blank:"地、的", options:["地、的","的、地","得、的","地、得"], note:"①苦口婆心地劝——动词前用「地」；②满不在乎的样子——名词前用「的」"},
+ {lessonId:"g5-3", sentence:"看着儿子又惊又怕__样子，张先生的眼眶红了，泪水不知不觉__流了下来。", blank:"的、地", options:["的、地","地、的","得、地","的、得"], note:"①又惊又怕的样子——名词前用「的」；②不知不觉地流——动词前用「地」"},
+ {lessonId:"g5-5", sentence:"不知为什么，一股深深__歉意竟悄悄__涌上了我的心头。", blank:"的、地", options:["的、地","地、的","得、地","的、得"], note:"①深深的歉意——名词前用「的」；②悄悄地涌上——动词前用「地」"},
+ {lessonId:"g5-6", sentence:"几个路人看见了，争先恐后__向钞票飘走__方向跑去。", blank:"地、的", options:["地、的","的、地","得、的","地、得"], note:"①争先恐后地跑——动词前用「地」；②飘走的方向——名词前用「的」"},
+ {lessonId:"g5-6", sentence:"望着他远去__背影，我忽然觉得他变__高大起来。", blank:"的、得", options:["的、得","得、的","地、得","的、地"], note:"①远去的背影——名词前用「的」；②变得高大——动词后接结果补语用「得」；「觉得」是固定词语，整体不拆分"},
+ {lessonId:"g5-7", sentence:"大家又兴奋又紧张，看着鲸鱼慢慢__回到了大海，悬着__心才放了下来。", blank:"地、的", options:["地、的","的、地","得、的","地、得"], note:"①慢慢地回到——动词前用「地」；②悬着的心——名词前用「的」"},
+ {lessonId:"g5-7", sentence:"我停下脚步，目不转睛__注视着小男孩努力救小鱼__动作。", blank:"地、的", options:["地、的","的、地","得、的","地、得"], note:"①目不转睛地注视——动词前用「地」；②救小鱼的动作——名词前用「的」"},
+ {lessonId:"g5-8", sentence:"为了不输给太阳，我拼命__跑，跑__上气不接下气。", blank:"地、得", options:["地、得","的、地","得、地","地、的"], note:"①拼命地跑——动词前用「地」；②跑得上气不接下气——动词后结果补语用「得」"},
+ {lessonId:"g5-11", sentence:"我气极了，像一头愤怒__狮子，不顾一切__向他扑去。", blank:"的、地", options:["的、地","地、的","得、地","的、得"], note:"①愤怒的狮子——名词前用「的」；②不顾一切地扑去——动词前用「地」"},
+ {lessonId:"g5-12", sentence:"国庆日那天，我和家人兴高采烈__来到滨海湾，观看盼望已久__国庆庆典。", blank:"地、的", options:["地、的","的、地","得、的","地、得"], note:"①兴高采烈地来到——动词前用「地」；②盼望已久的国庆庆典——名词前用「的」"},
+ {lessonId:"g5-14", sentence:"老师温柔__说：「凡是你会回答__，就举右手。」", blank:"地、的", options:["地、的","的、地","得、的","地、得"], note:"①温柔地说——动词前用「地」；②你会回答的——「的」字结构，后省略宾语"},
+ {lessonId:"g5-14", sentence:"每当我和陈老师__目光相遇时，我们都会心照不宣__笑一笑。", blank:"的、地", options:["的、地","地、的","得、地","的、得"], note:"①陈老师的目光——名词前用「的」；②心照不宣地笑——动词前用「地」"},
+ {lessonId:"g5-15", sentence:"一个晴朗__夜晚，微风轻轻__吹着。", blank:"的、地", options:["的、地","地、的","得、地","的、得"], note:"①晴朗的夜晚——名词前用「的」；②轻轻地吹——动词前用「地」"},
+ {lessonId:"g5-15", sentence:"我们要学会它__姿态，笔直__站立着。", blank:"的、地", options:["的、地","地、的","得、地","的、得"], note:"①它的姿态——名词前用「的」；②笔直地站立——动词前用「地」"},
+ {lessonId:"g6-10", sentence:"从餐馆飘来了一阵阵诱人__菜香，我__肚子开始「捣蛋」了，咕噜咕噜__叫起来。", blank:"的、的、地", options:["的、的、地","地、的、的","的、地、的","得、的、地"], note:"①诱人的菜香、我的肚子——名词前用「的」；②咕噜咕噜地叫——动词前用「地」"},
+ {lessonId:"g6-10", sentence:"我像一匹饥饿__狼寻找食物一样，快速__在书架第三排__位置寻找。", blank:"的、地、的", options:["的、地、的","地、的、地","得、地、的","的、的、地"], note:"①饥饿的狼——名词前用「的」；②快速地在……寻找——动词前用「地」；③第三排的位置——名词前用「的」"},
+ {lessonId:"g5-1", sentence:"天渐渐__暖和起来，我们出门踏青，沿途看见了清澈__小河，郁郁葱葱__大树。", blank:"地、的、的", options:["地、的、的","的、地、的","得、的、的","地、得、的"], note:"①渐渐地暖和——副词（渐渐）修饰动词前用「地」；②清澈的小河、郁郁葱葱的大树——名词前用「的」。「得」后面的词语一般用来补充说明「得」前面的动作怎么样，如「累得喘气」"},
+ {lessonId:"g5-8", sentence:"他努力地把一个距离他好几米__大锅往外推，累__直喘粗气。", blank:"的、得", options:["的、得","得、的","地、得","的、地"], note:"①好几米的大锅——名词前用「的」；②累得直喘粗气——「得」引出结果补语，说明「累」到什么程度"},
+ {lessonId:"g5-12", sentence:"运动会马上就要开始了，激动__观众早就拿好东西坐在了看台上，运动员紧张__坐立难安。", blank:"的、得", options:["的、得","得、的","地、得","的、地"], note:"①激动的观众——名词前用「的」；②紧张得坐立难安——「得」引出结果补语，说明「紧张」到什么程度"},
+ {lessonId:"g5-7", sentence:"小狗累__趴在地上喘着粗气。", blank:"得", options:["得","的","地","着"], note:"累得趴在地上——「得」引出结果补语，说明「累」到什么程度；「地上」的「地」是名词，不是助词"},
+ {lessonId:"g5-15", sentence:"羊毛白__就像天上__云彩。", blank:"得、的", options:["得、的","的、得","地、的","得、地"], note:"①白得就像云彩——「得」引出比喻性结果补语，说明「白」到什么程度；②天上的云彩——名词前用「的」"},
+
+ // ── 需求4：形近字专项辨析 ──
+ {lessonId:"g5-2", sentence:"老师精心__育我们，希望我们将来能成为对社会有贡献的人。", blank:"培", options:["陪","培","赔","倍"], note:"培育/培养——培＝土+不，跟土地、栽培有关；陪伴；赔偿；加倍"},
+ {lessonId:"g6-9", sentence:"他戴上眼__，仔细查看地图上的每一个标记。", blank:"镜", options:["镜","境","竟","竞"], note:"眼镜——镜＝金+竟，跟金属/玻璃有关；境界；竟然；竞争"},
+ {lessonId:"g6-9", sentence:"两队选手在场上激烈地__争，观众们屏息凝神地观看。", blank:"竞", options:["兢","意","竟","竞"], note:"竞争——竞＝立+兄，争夺第一；兢兢业业；意思；竟然"},
+ {lessonId:"g5-13", sentence:"在众多选项中，他仔细__选出了最合适的答案。", blank:"择", options:["泽","择","驿","译"], note:"选择——择＝扌+睪，用手挑选；泽（湖泽）；驿（驿站）；译（翻译）"},
+ {lessonId:"g5-13", sentence:"汉字是古老的文字，距今有三千多年的__史。", blank:"历", options:["历","厉","励","例"], note:"历史的历——历＝厂+力，表示经过、经历；厉（严厉）；励（鼓励）；例（例子）"},
+ {lessonId:"g5-20", sentence:"经过一__时间的努力，他终于学会了骑自行车。", blank:"段", options:["段","断","锻","缎"], note:"一段时间——段＝殳+右，表示一部分；断（断开）；锻（锻炼）；缎（缎子）。注意「段」右边是殳，不是斤"},
+ {lessonId:"g5-20", sentence:"放学后，我们坐地__回家，既快又方便。", blank:"铁", options:["铁","跌","失","迭"], note:"地铁的铁——铁＝钅+失，金属类字；跌（跌倒）；失（失去）；迭（迭代）。注意右边是「失」不是别的"},
+ {lessonId:"g5-20", sentence:"他感冒了，不停地咳__，喉咙又痛又痒。", blank:"嗽", options:["嗽","漱","敕","束"], note:"咳嗽的嗽——口字旁+欶；漱（洗漱，三点水）；敕（敕令）；束（束缚）。「嗽」有口字旁因为是用嘴咳，「漱」有三点水因为是漱口"},
+ {lessonId:"g5-20", sentence:"早上起床后，要先刷牙漱口，养成洗__的好习惯。", blank:"漱", options:["漱","嗽","敕","束"], note:"洗漱的漱——三点水+欶；嗽（咳嗽后字，口字旁）；敕（敕令）；束（束缚）。「漱」有三点水因为是漱口，「嗽」有口字旁因为是用嘴咳"},
+ {lessonId:"g5-18", sentence:"他去超市__物，买了许多新鲜的蔬菜和水果。", blank:"购", options:["购","够","构","钩"], note:"购物——购＝贝+勾，跟金钱/购买有关；足够；构造；钩子"},
+ {lessonId:"g5-2", sentence:"他在奶奶身边陪伴，让奶奶感受到了加__努力后收获的喜悦。", blank:"倍", options:["陪","培","赔","倍"], note:"加倍——倍＝亻+咅，表示数量倍增；陪伴；培养；赔偿"},
+ {lessonId:"g5-8", sentence:"上课时要__意听讲，不要走神。", blank:"注", options:["注","住","驻","柱"], note:"注意——注＝氵+主，引导注意力（如注水导流）；住（居住）；驻（驻扎）；柱（柱子）"},
+ {lessonId:"g6-10", sentence:"这道数学题太难了，答案真是让人不可思__！", blank:"议", options:["意","义","议","易"], note:"不可思议——议＝讠+义，与语言/商讨有关；意思；意义；容易"},
+
+ // ── in / ing 拼音辨析专项 ──
+ // yin vs ying
+ {lessonId:"g5-6",  type:"pinyin", sentence:"银行", blank:"yín háng",  options:["yín háng","yíng háng"],  note:"银=yín（前鼻音 in），不是 yíng；记忆：银行是存钱的地方，「银」字读前鼻音"},
+ {lessonId:"g5-15", type:"pinyin", sentence:"阴凉", blank:"yīn liáng", options:["yīn liáng","yīng liáng"], note:"阴=yīn（前鼻音 in），不是 yīng；「阴」和「因」同音，都是前鼻音"},
+ {lessonId:"g5-18", type:"pinyin", sentence:"英雄", blank:"yīng xióng", options:["yīn xióng","yīng xióng"], note:"英=yīng（后鼻音 ing），不是 yīn；「英」字读后鼻音，如英语、英国"},
+ {lessonId:"g5-19", type:"pinyin", sentence:"影响", blank:"yǐng xiǎng", options:["yǐn xiǎng","yǐng xiǎng"], note:"影=yǐng（后鼻音 ing），不是 yǐn；「影」和「影子」同字，读后鼻音"},
+ {lessonId:"g5-18", type:"pinyin", sentence:"引来", blank:"yǐn lái",   options:["yǐn lái","yǐng lái"],   note:"引=yǐn（前鼻音 in），不是 yǐng；「引」和「饮」同音声母相同，都是前鼻音"},
+ {lessonId:"g5-20", type:"pinyin", sentence:"饮料", blank:"yǐn liào",  options:["yǐn liào","yǐng liào"],  note:"饮=yǐn（前鼻音 in），不是 yǐng；「饮料」的「饮」和「引」同音"},
+ // jin vs jing
+ {lessonId:"g5-18", type:"pinyin", sentence:"禁止", blank:"jìn zhǐ",   options:["jìn zhǐ","jìng zhǐ"],   note:"禁=jìn（前鼻音 in），不是 jìng；区分：进（jìn）、金（jīn）都是前鼻音"},
+ {lessonId:"g5-18", type:"pinyin", sentence:"竞赛", blank:"jìng sài",  options:["jìn sài","jìng sài"],    note:"竞=jìng（后鼻音 ing），不是 jìn；区分：镜（jìng）、静（jìng）都是后鼻音"},
+ {lessonId:"g5-19", type:"pinyin", sentence:"精彩", blank:"jīng cǎi",  options:["jīn cǎi","jīng cǎi"],   note:"精=jīng（后鼻音 ing），不是 jīn；「精」和「晶、京」同韵，都是后鼻音"},
+ // xin vs xing
+ {lessonId:"g5-2",  type:"pinyin", sentence:"心情", blank:"xīn qíng",  options:["xīn qíng","xīng qíng"],  note:"心=xīn（前鼻音 in），不是 xīng；「心、新、信」都是前鼻音 xin"},
+ {lessonId:"g5-1",  type:"pinyin", sentence:"行动", blank:"xíng dòng", options:["xín dòng","xíng dòng"],  note:"行=xíng（后鼻音 ing），不是 xín；「行、形、型」都是后鼻音 xing"},
+ {lessonId:"g5-19", type:"pinyin", sentence:"性格", blank:"xìng gé",   options:["xìn gé","xìng gé"],     note:"性=xìng（后鼻音 ing），不是 xìn；「性、星、兴」都是后鼻音 xing"},
+ {lessonId:"g5-18", type:"pinyin", sentence:"新鲜", blank:"xīn xiān",  options:["xīng xiān","xīn xiān"],  note:"新=xīn（前鼻音 in），不是 xīng；「新、心、信」同韵，都是前鼻音"},
+ // pin vs ping
+ {lessonId:"g5-19", type:"pinyin", sentence:"品格", blank:"pǐn gé",    options:["pǐn gé","pǐng gé"],     note:"品=pǐn（前鼻音 in），不是 pǐng；「品、拼、贫」都是前鼻音 pin"},
+ {lessonId:"g5-19", type:"pinyin", sentence:"平台", blank:"píng tái",  options:["pín tái","píng tái"],    note:"平=píng（后鼻音 ing），不是 pín；「平、瓶、评」都是后鼻音 ping"},
+ {lessonId:"g5-18", type:"pinyin", sentence:"屏幕", blank:"píng mù",   options:["pín mù","píng mù"],     note:"屏=píng（后鼻音 ing），不是 pín；「屏」和「平」同音，后鼻音"},
+ // qin vs qing
+ {lessonId:"g5-19", type:"pinyin", sentence:"辛勤", blank:"xīn qín",   options:["xīn qín","xīn qíng"],   note:"勤=qín（前鼻音 in），不是 qíng；区分：「勤、琴、秦」都是前鼻音 qin"},
+ {lessonId:"g5-11", type:"pinyin", sentence:"情况", blank:"qíng kuàng",options:["qín kuàng","qíng kuàng"],note:"情=qíng（后鼻音 ing），不是 qín；「情、晴、青」都是后鼻音 qing"},
+ {lessonId:"g5-19", type:"pinyin", sentence:"亲切", blank:"qīn qiè",   options:["qīng qiè","qīn qiè"],   note:"亲=qīn（前鼻音 in），不是 qīng；「亲、琴」同韵，前鼻音 qin"},
+ {lessonId:"g5-20", type:"pinyin", sentence:"拼音", blank:"pīn yīn",   options:["pīn yīn","pīng yīng"],  note:"「拼」和「音」都是前鼻音 in：pīn yīn，不要读成 pīng yīng"},
+ {lessonId:"g5-20", type:"pinyin", sentence:"井水", blank:"jǐng shuǐ", options:["jǐng shuǐ","jǐn shuǐ"],  note:"井=jǐng（后鼻音 ing），不是 jǐn；「井、竟、境」都是后鼻音"},
+ {lessonId:"g5-20", type:"pinyin", sentence:"安静", blank:"ān jìng",   options:["ān jìng","ān jìn"],      note:"静=jìng（后鼻音 ing），不是 jìn；「静、镜、竟」都是后鼻音"},
+ {lessonId:"g5-20", type:"pinyin", sentence:"并且", blank:"bìng qiě",  options:["bìng qiě","bìn qiě"],    note:"并=bìng（后鼻音 ing），不是 bìn；「并、病、饼」都是后鼻音 bing"},
+ {lessonId:"g5-20", type:"pinyin", sentence:"安宁", blank:"ān níng",   options:["ān níng","ān nín"],       note:"宁=níng（后鼻音 ing），不是 nín；「宁、凝」读后鼻音"},
+ {lessonId:"g6-11", type:"pinyin", sentence:"兴奋", blank:"xìng fèn",  options:["xìng fèn","xìn fèn"],    note:"兴=xìng（后鼻音 ing），不是 xìn；「兴、星、性」都是后鼻音 xing"},
+ {lessonId:"g5-20", type:"pinyin", sentence:"星星", blank:"xīng xīng", options:["xīng xīng","xīn xīn"],   note:"星=xīng（后鼻音 ing），不是 xīn；「星、兴、醒」都是后鼻音"},
 ];
 
 
@@ -879,10 +1087,48 @@ function buildItems(){
 buildItems();
 
 // ---------- 持久化存储 ----------
+// 字字珠玑独立运行时（脱离 Claude artifacts 环境，作为"添加到主屏幕"网页应用），
+// 用浏览器原生 localStorage 模拟出和 window.storage 完全一样的接口，
+// 这样上面所有调用 window.storage.get/set 的代码完全不用改。
+// 如果当前环境本身就提供了真正的 window.storage（比如还在 Claude 里预览），优先用真的。
+if(!window.storage){
+  const LS_PREFIX = 'zzzhj_'; // 字字珠玑专属前缀，避免和同一浏览器里其他网页的 localStorage 冲突
+  function lsKey(key, shared){ return LS_PREFIX + (shared?'shared_':'p_') + key; }
+  window.storage = {
+    async get(key, shared){
+      let raw;
+      try{ raw = localStorage.getItem(lsKey(key, shared)); }
+      catch(e){ throw new Error('localStorage unavailable: '+e.message); }
+      if(raw === null) throw new Error('key not found: '+key); // 和原 window.storage 行为保持一致：不存在时抛错
+      return { key, value: raw, shared: !!shared };
+    },
+    async set(key, value, shared){
+      try{ localStorage.setItem(lsKey(key, shared), value); }
+      catch(e){ console.warn('保存失败（可能是隐私浏览模式或存储已满）：', e.message); return null; }
+      return { key, value, shared: !!shared };
+    },
+    async delete(key, shared){
+      try{ localStorage.removeItem(lsKey(key, shared)); }catch(e){}
+      return { key, deleted:true, shared: !!shared };
+    },
+    async list(prefix, shared){
+      const keys = [];
+      try{
+        const pfx = LS_PREFIX + (shared?'shared_':'p_') + (prefix||'');
+        for(let i=0;i<localStorage.length;i++){
+          const k = localStorage.key(i);
+          if(k && k.startsWith(pfx)) keys.push(k.slice((LS_PREFIX + (shared?'shared_':'p_')).length));
+        }
+      }catch(e){}
+      return { keys, prefix, shared: !!shared };
+    }
+  };
+}
+
 const STORE_KEY = 'srs_progress_v1';
 const SETTINGS_KEY = 'app_settings_v1';
 let PROGRESS = {}; // itemId -> {ease, interval, reps, lapses, due, lastResult}
-let SETTINGS = { selectedLessons: LESSONS.map(l=>l.id), examDate:'2026-09-01', dailyNew:18, mode:'mixed', voiceRate:0.85 };
+let SETTINGS = { selectedLessons: LESSONS.map(l=>l.id), examDate:'2026-09-28', dailyNew:20, mode:'mixed', voiceRate:0.85 };
 
 async function loadAll(){
   try{
@@ -892,6 +1138,14 @@ async function loadAll(){
   try{
     const r2 = await window.storage.get('settings', false);
     if(r2 && r2.value) SETTINGS = Object.assign(SETTINGS, JSON.parse(r2.value));
+    // 新增课文自动加入 selectedLessons：如果 LESSONS 里有的课 selectedLessons 里没有，自动补上
+    // 这样老用户在升级题库后，新课不需要手动去「选课文」页面勾选
+    const sel = new Set(SETTINGS.selectedLessons);
+    const newLessons = LESSONS.filter(l=>!sel.has(l.id)).map(l=>l.id);
+    if(newLessons.length > 0){
+      SETTINGS.selectedLessons = SETTINGS.selectedLessons.concat(newLessons);
+      await saveSettings();
+    }
   }catch(e){ /* keep defaults */ }
   try{
     const r3 = await window.storage.get('customTips', false);
@@ -914,31 +1168,75 @@ async function saveTips(){
   try{ await window.storage.set('customTips', JSON.stringify(CUSTOM_TIPS), false); }catch(e){}
 }
 
+// 学生反映容易出错的词，初始ease降低，SRS会更频繁地安排复习
+// lessonId g5-20 = 补充易错词单元，整体设低ease；另有散落在其他课的难词
+const HARD_ITEM_IDS = new Set([
+  'g5-17:w:0',  // 冬暖夏凉
+  'g5-18:w:26', // 犯错误
+  'g6-4:w:6',   // 逛街
+  'g6-8:w:14',  // 左邻右舍
+  'g6-8:w:18',  // 展览
+  // 以词语搭配形式存在的难词
+  'g5-5:w:5',   // 参加测试（含测试）
+  'g5-17:w:9',  // 体形矮小（含矮小）
+  'g5-18:w:0',  // 野外探险（含探险）
+  'g5-18:w:21', // 盯着屏幕（含屏幕）
+  'g5-18:w:37', // 缺少食物（含缺少）
+  'g5-18:w:49', // 新鲜蔬菜（含蔬菜）
+  'g5-19:w:5',  // 鼻子一酸（含鼻子）
+  'g5-19:w:31', // 繁华城市（含繁华）
+  'g5-19:w:60', // 体形矮小（含矮小）
+  'g6-9:w:19',  // 性格固执（含固执）
+  // 第二批补充
+  'g6-5:w:4',   // 说谎
+  'g5-18:w:8',  // 风中摇摆（含摇摆）
+  'g5-18:w:6',  // 竞赛规则（含规则）
+  'g6-10:w:7',  // 获得
+]);
+
 function getState(itemId){
   if(!PROGRESS[itemId]){
-    PROGRESS[itemId] = {ease:2.5, interval:0, reps:0, lapses:0, due:todayStr(), seen:false};
+    // g5-20整个单元，或在难词列表里的条目，初始ease降至1.8（复习频率更高）
+    const isHard = itemId.startsWith('g5-20:') || HARD_ITEM_IDS.has(itemId);
+    PROGRESS[itemId] = {ease: isHard ? 1.8 : 2.5, interval:0, reps:0, lapses:0, due:todayStr(), seen:false};
   }
   return PROGRESS[itemId];
 }
 
-// ---------- SRS 算法（简化版 SM-2） ----------
+// ---------- SRS 算法（记忆曲线版） ----------
+// 规则：
+//   答对第1次 → 1天后复习
+//   答对第2次 → 3天后复习
+//   答对第3次 → 7天后复习
+//   答对第4次 → ✅ 掌握，永久退出练习队列（仍可在词库查看）
+//   任意一次答错 → 归零（reps=0），当天重练，错题优先
+// reps = 当前连续答对次数（答错立即归零）
+// lapses = 累计答错次数（永不归零，用于错题优先排序）
+// mastered = true 表示已达到第4次答对，永久退出队列
+const SRS_INTERVALS = [0, 1, 3, 7]; // 第1/2/3次答对后的间隔天数
+
 function reviewItem(itemId, correct){
   const st = getState(itemId);
   st.seen = true;
   if(correct){
-    st.reps += 1;
-    if(st.reps === 1) st.interval = 1;
-    else if(st.reps === 2) st.interval = 3;
-    else st.interval = Math.round(st.interval * st.ease);
-    st.ease = Math.min(2.9, st.ease + 0.04);
-    st.due = addDays(todayStr(), st.interval);
+    st.reps = (st.reps || 0) + 1;
+    if(st.reps >= 4){
+      // 第4次答对：正式掌握，永久退出队列
+      st.mastered = true;
+      st.due = '9999-12-31';
+      st.interval = 9999;
+    } else {
+      st.interval = SRS_INTERVALS[st.reps] || 1;
+      st.due = addDays(todayStr(), st.interval);
+    }
     st.lastResult = 'right';
   } else {
+    // 任意一次答错：归零
     st.reps = 0;
-    st.interval = 1;
-    st.ease = Math.max(1.3, st.ease - 0.22);
-    st.lapses = (st.lapses||0) + 1;
-    st.due = todayStr(); // 当天重练
+    st.mastered = false;
+    st.interval = 0;
+    st.lapses = (st.lapses || 0) + 1;
+    st.due = todayStr();
     st.lastResult = 'wrong';
   }
   saveProgress();
@@ -946,10 +1244,10 @@ function reviewItem(itemId, correct){
 
 function masteryLevel(st){
   if(!st || !st.seen) return 0;
-  if(st.lapses>0 && st.reps<2) return 1; // 易错
-  if(st.reps>=4) return 3; // 熟练
-  if(st.reps>=1) return 2; // 学习中
-  return 1;
+  if(st.mastered) return 4;      // 已掌握（4次全对）
+  if((st.reps||0) >= 3) return 3; // 第3次答对，即将掌握
+  if((st.reps||0) >= 1) return 2; // 学习中
+  return 1;                        // 见过但答错过/待复习
 }
 
 // ---------- 队列构建 ----------
@@ -958,21 +1256,40 @@ function selectedItems(){
   return ITEMS.filter(it=>sel.has(it.lessonId));
 }
 function interleaveByLesson(items){
-  // 同一课内部保持原有顺序（如词语1再词语2），但在课与课之间轮流抽取，
-  // 避免新词额度被排在最前面的一课用完，导致后面选中的课文永远轮不到。
-  const byLesson = new Map();
-  const lessonOrder = [];
+  // 先按年级分组，再在年级内按课轮流，保证两个年级均匀出现
+  // 避免五年级20课 vs 六年级12课导致五年级新词占绝大多数的问题
+  const byGrade = new Map();
   items.forEach(it=>{
-    if(!byLesson.has(it.lessonId)){ byLesson.set(it.lessonId, []); lessonOrder.push(it.lessonId); }
-    byLesson.get(it.lessonId).push(it);
+    if(!byGrade.has(it.grade)) byGrade.set(it.grade, new Map());
+    const gradeMap = byGrade.get(it.grade);
+    if(!gradeMap.has(it.lessonId)) gradeMap.set(it.lessonId, []);
+    gradeMap.get(it.lessonId).push(it);
   });
+
+  // 每个年级内部轮流各课取一个
+  function drainGrade(gradeMap){
+    const lessonOrder = [...gradeMap.keys()];
+    const result = [];
+    let added = true;
+    while(added){
+      added = false;
+      for(const lid of lessonOrder){
+        const bucket = gradeMap.get(lid);
+        if(bucket && bucket.length){ result.push(bucket.shift()); added = true; }
+      }
+    }
+    return result;
+  }
+
+  const gradeQueues = [...byGrade.keys()].sort().map(g=>drainGrade(byGrade.get(g)));
+
+  // 年级间轮流：每次各年级各取一个，保证五六年级均匀
   const result = [];
   let added = true;
   while(added){
     added = false;
-    for(const lid of lessonOrder){
-      const bucket = byLesson.get(lid);
-      if(bucket.length){ result.push(bucket.shift()); added = true; }
+    for(const gq of gradeQueues){
+      if(gq.length){ result.push(gq.shift()); added = true; }
     }
   }
   return result;
@@ -981,25 +1298,54 @@ function dueQueue(limit, kindFilter){
   let items = selectedItems();
   if(kindFilter) items = items.filter(it=>it.kind===kindFilter);
   const today = todayStr();
-  const due = [];
-  const fresh = [];
+  const due = [];      // 到期旧题（需要复习）
+  const fresh = [];    // 新词（从未练过）
+  const notYet = [];   // 未到期旧题（练过但还没到复习日，备用补位）
   items.forEach(it=>{
     const st = PROGRESS[it.id];
+    if(st && (st.tooEasy || 0) >= 3) return; // 永久跳过（太简单了）
+    if(st && st.mastered) return;             // 已掌握（4次全对），永久退出队列
     if(st && st.seen){
       if(st.due <= today) due.push(it);
+      else notYet.push(it);  // 练过但未到期——题目不足时用来补位
     } else {
       fresh.push(it);
     }
   });
-  // 优先：错题多的 due 项 > 一般 due 项 > 新项（在所选课文之间轮流抽取，控制每日新词数量）
+
+  // 到期旧题：错题多的优先
   due.sort((a,b)=> (PROGRESS[b.id].lapses||0) - (PROGRESS[a.id].lapses||0));
-  fresh.sort((a,b)=> a.grade-b.grade || a.lessonNum - b.lessonNum || a.id.localeCompare(b.id));
+  // 新词：按课文顺序轮流抽取
+  fresh.sort((a,b)=> a.grade-b.grade || a.lessonNum-b.lessonNum || a.id.localeCompare(b.id));
+  // 未到期旧题：按到期日从近到远排（最快要到期的先出，减少对SRS节奏的干扰）
+  notYet.sort((a,b)=> PROGRESS[a.id].due.localeCompare(PROGRESS[b.id].due));
+
   const interleavedFresh = interleaveByLesson(fresh);
-  const newBudget = Math.max(0, SETTINGS.dailyNew);
-  const queue = due.concat(interleavedFresh.slice(0, newBudget));
-  // 打散一下，避免连续同一课
+  const sessionTarget = Math.max(6, SETTINGS.dailyNew);
+  const freshTarget = Math.round(sessionTarget * 2 / 3);
+  const dueTarget   = sessionTarget - freshTarget;
+
+  const freshSlice = interleavedFresh.slice(0, freshTarget);
+  const freshShortfall = freshTarget - freshSlice.length;
+  const dueSlice = due.slice(0, dueTarget + freshShortfall);
+  const dueShortfall = Math.max(0, dueTarget - dueSlice.length);
+  const extraFresh = interleavedFresh.slice(freshTarget, freshTarget + dueShortfall);
+
+  let queue = dueSlice.concat(freshSlice).concat(extraFresh);
+
+  // 如果 due + fresh 都不足，用未到期旧题补位，凑满 sessionTarget
+  // 这样即使所有词都练过了且未到期，学生每次仍能做到目标题数
+  if(queue.length < sessionTarget){
+    const shortfall = sessionTarget - queue.length;
+    const usedIds = new Set(queue.map(it=>it.id));
+    const padding = notYet.filter(it=>!usedIds.has(it.id)).slice(0, shortfall);
+    queue = queue.concat(padding);
+  }
+
+  // Fisher-Yates 打散
   for(let i=queue.length-1;i>0;i--){
-    if(Math.random()<0.35){ const j=Math.floor(Math.random()*(i+1)); [queue[i],queue[j]]=[queue[j],queue[i]]; }
+    const j=Math.floor(Math.random()*(i+1));
+    [queue[i],queue[j]]=[queue[j],queue[i]];
   }
   return limit ? queue.slice(0,limit) : queue;
 }
@@ -1007,22 +1353,22 @@ function dueQueue(limit, kindFilter){
 // ---------- 统计 ----------
 function computeStats(){
   const items = selectedItems();
-  let mastered=0, learning=0, weak=0, untouched=0;
+  let mastered=0, learning=0, weak=0, untouched=0, errCount=0;
   let dueToday=0;
   const today = todayStr();
   items.forEach(it=>{
     const st = PROGRESS[it.id];
-    const lvl = masteryLevel(st);
-    if(lvl===0) untouched++;
-    else if(lvl===1) weak++;
-    else if(lvl===2) learning++;
-    else mastered++;
-    if(st && st.seen && st.due<=today) dueToday++;
-    else if(!st || !st.seen) { /* counted separately as new */ }
+    if(!st || !st.seen){ untouched++; }
+    else if(st.mastered){ mastered++; }
+    else if((st.reps||0) >= 3){ learning++; }  // 第3遍，即将掌握
+    else if((st.reps||0) >= 1){ learning++; }   // 学习中
+    else { weak++; }                             // 见过但归零/待复习
+    if(st && (st.lapses||0) > 0) errCount++;
+    if(st && st.seen && !st.mastered && st.due<=today) dueToday++;
   });
   const total = items.length;
   const score = total ? Math.round((weak*0.3 + learning*0.6 + mastered*1.0) / total * 100) : 0;
-  return {total, mastered, learning, weak, untouched, dueToday, newCount: untouched, score};
+  return {total, mastered, learning, weak, untouched, dueToday, newCount: untouched, score, errCount};
 }
 function lessonStats(lessonId){
   const items = ITEMS.filter(it=>it.lessonId===lessonId);
@@ -1049,9 +1395,9 @@ function hasDueInLesson(lessonId){
 
 // ---------- 选择题质量控制：默认屏蔽字 + 用户自定义题库（持久化） ----------
 const DEFAULT_BLOCKED_CHARS = [
- '的','地','得','了','着','在','是','有','我','你','他','她','它','们','这','那','哪',
+ '了','着','在','是','有','我','你','他','她','它','们','这','那','哪',
  '一','二','三','四','五','六','七','八','九','十','百','千','万',
- '不','也','就','都','很','和','与','但','而','又','还','才','子','个','么','吗','呢','吧','啊','呀',
+ '不','也','就','都','很','和','与','但','而','又','还','才','子','个','么','吗','呢','吧','啊','呀','并',
  '把','被','给','让','叫','到','去','来','上','下','大','小','多','少','好','人','儿','头','中','之',
  '以','为','于','所','其','可','能','会','要','自','已'
 ].filter((v,i,a)=>a.indexOf(v)===i); // 去重
@@ -1130,10 +1476,16 @@ function generateMCQForItem(item, hanziBank, usedKeys, hanziFreq){
   // 1) 尝试匹配精选题库（含用户自定义、排除被删除的内置题）：同课文 + 目标字属于该题的字
   //    同时做数据完整性校验（例句须含答案字、选项须含答案且互不重复），有问题的条目直接跳过，改走动态生成兜底
   const allConfusables = effectiveConfusables();
-  const curatedMatches = allConfusables.filter(c=>
-    c.lessonId===item.lessonId && candidateChars.includes(c.blank) && !usedKeys.has(c._key) &&
-    c.sentence.includes(c.blank) && c.options.includes(c.blank) && new Set(c.options).size===c.options.length
-  );
+  const curatedMatches = allConfusables.filter(c=>{
+    if(usedKeys.has(c._key)) return false;
+    // 多空题（blank含顿号，如"地、的、得"）：句子用__占位，不走candidateChars匹配
+    const isMultiBlank = c.blank.includes('、');
+    if(isMultiBlank) return false; // 多空题由专项通道单独触发，不走常规匹配
+    // 单字题：常规校验
+    return c.lessonId===item.lessonId && candidateChars.includes(c.blank) &&
+      (c.sentence.includes(c.blank) || c.sentence.includes('__')) &&
+      c.options.includes(c.blank) && new Set(c.options).size===c.options.length;
+  });
   if(curatedMatches.length>0){
     const pick = curatedMatches[Math.floor(Math.random()*curatedMatches.length)];
     usedKeys.add(pick._key);
@@ -1252,13 +1604,24 @@ function clearInk(canvas){
 function buildCellWriter(container, count){
   container.innerHTML = '';
   const cells = [];
+  // 动态计算格子边长：每行最多放4个字（超过4个才换行），按实际换行后每行的字数计算尺寸，
+  // 这样长词换行后格子也能尽量大，而不是按"塞满一行"的假设挤压尺寸
+  const gap = 8;
+  const maxPerRow = 3;
+  const rows = Math.ceil(count / maxPerRow) || 1;
+  const perRow = Math.ceil(count / rows); // 实际每行字数（让多行排布更均匀，比如6字=3+3而不是4+2）
+  const containerWidth = container.clientWidth || (window.innerWidth - 56);
+  let size = Math.floor((containerWidth - gap * (perRow - 1)) / perRow);
+  size = Math.max(64, Math.min(112, size)); // 64~112px 之间，不会小到难写，也不会大到离谱
   for(let i=0;i<count;i++){
     const cell = document.createElement('div');
     cell.className = 'cell';
+    cell.style.width = size + 'px';
+    cell.style.height = size + 'px';
     const guide = document.createElement('canvas');
-    guide.className = 'guide'; guide.width=160; guide.height=160;
+    guide.className = 'guide'; guide.width=200; guide.height=200;
     const ink = document.createElement('canvas');
-    ink.width=160; ink.height=160;
+    ink.width=200; ink.height=200;
     cell.appendChild(guide); cell.appendChild(ink);
     container.appendChild(cell);
     drawGuide(guide);
@@ -1287,6 +1650,11 @@ function showScreen(name){
   document.getElementById('screen-'+name).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.nav===name));
   window.scrollTo(0,0);
+  // 离开练习页时重置nextBtn，防止残留按钮出现在其他页面
+  if(name !== 'practice'){
+    const nb = document.querySelector('#screen-practice #nextBtn');
+    if(nb) nb.style.display = 'none';
+  }
   if(name==='home') renderHome();
   if(name==='lessons') renderLessons();
   if(name==='stats') renderStats();
@@ -1318,20 +1686,22 @@ function renderHome(){
         <div class="stat-box due"><div class="n">${stats.dueToday}</div><div class="l">待复习</div></div>
         <div class="stat-box"><div class="n">${stats.learning}</div><div class="l">学习中</div></div>
         <div class="stat-box mastered"><div class="n">${stats.mastered}</div><div class="l">已掌握</div></div>
-        <div class="stat-box"><div class="n">${stats.weak}</div><div class="l">易错</div></div>
+        <div class="stat-box" id="errStatBox" style="${stats.errCount>0?'cursor:pointer;':''}">
+          <div class="n" style="${stats.errCount>0?'color:var(--seal);':''}">${stats.errCount}</div>
+          <div class="l">错字本${stats.errCount>0?'↗':''}</div>
+        </div>
       </div>
-      <button class="btn btn-primary btn-block" style="margin-top:20px;" onclick="startSession()">📝 开始今日复习</button>
+      ${stats.dueToday===0 && stats.mastered>0 ? `<div style="font-size:11px;color:var(--ink-soft);margin-top:8px;text-align:center;">✓ 今日到期词语已全部复习，继续练习会巩固未到期的词</div>` : ''}
     </div>
 
-    <h2 class="section-title">练习模式 <span class="tag">可多选混合</span></h2>
-    <div class="mode-grid" id="modeGrid"></div>
+    <div class="mode-section" id="modeSection"></div>
 
     <h2 class="section-title">总体进度</h2>
     <div class="card"><div class="card-inner">
       <div class="bar-row"><div class="lbl">全部 ${stats.total} 项</div>
         <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
         <div class="bar-pct">${pct}%</div></div>
-      <div style="font-size:11.5px;color:var(--ink-soft);margin-top:6px;">学习进度综合了「学习中/易错/已掌握」各阶段，不是只看完全掌握的比例 · 已选 ${SETTINGS.selectedLessons.length} / ${LESSONS.length} 课 · 距考试还有 <b style="color:var(--seal)">${daysBetween(todayStr(),SETTINGS.examDate)}</b> 天</div>
+      <div style="font-size:11.5px;color:var(--ink-soft);margin-top:6px;">综合了「学习中/易错/已掌握」各阶段 · 已选 ${SETTINGS.selectedLessons.length} / ${LESSONS.length} 课 · 距考试还有 <b style="color:var(--seal)">${daysBetween(todayStr(),SETTINGS.examDate)}</b> 天</div>
     </div></div>
 
     <div class="btn-row">
@@ -1340,20 +1710,56 @@ function renderHome(){
     </div>
   `;
   const modes = [
-    {id:'mixed', icon:'🎲', t:'综合混合', d:'听写+填空+辨字+造句'},
-    {id:'word', icon:'🖊️', t:'词语听写', d:'听拼音写汉字'},
-    {id:'sentence', icon:'📜', t:'句子默写', d:'挖空/整句默写'},
-    {id:'mcq', icon:'🔍', t:'形近字辨析', d:'选出正确的字'},
-    {id:'sentmaking', icon:'✏️', t:'造句练习', d:'用词语自由造句'},
+    {id:'mixed',     icon:'🎲', t:'综合混合',   d:'听写+填空+辨字+造句'},
+    {id:'word',      icon:'🖊️', t:'词语听写',   d:'听拼音写汉字'},
+    {id:'sentence',  icon:'📜', t:'句子默写',   d:'挖空/整句默写'},
+    {id:'mcq',       icon:'🔍', t:'形近字辨析', d:'选出正确的字'},
+    {id:'dede',      icon:'的', t:'的地得专项', d:'专攻三个助词用法'},
+    {id:'pinyin',    icon:'拼', t:'拼音辨析',   d:'in/ing等易混读音'},
   ];
-  const grid = document.getElementById('modeGrid');
-  grid.innerHTML = modes.map(m=>`
-    <div class="mode-card ${SETTINGS.mode===m.id?'active':''}" data-mode="${m.id}">
-      <div class="mi">${m.icon}</div><div class="mt">${m.t}</div><div class="md">${m.d}</div>
-    </div>`).join('');
-  grid.querySelectorAll('.mode-card').forEach(c=>{
-    c.addEventListener('click', ()=>{ SETTINGS.mode=c.dataset.mode; saveSettings(); renderHome(); });
+  const cur = modes.find(m=>m.id===SETTINGS.mode) || modes[0];
+  const sec = document.getElementById('modeSection');
+  sec.innerHTML = `
+    <!-- 胶囊组合：圆形模式徽章 + 长条开始按钮 -->
+    <div class="mode-capsule-wrap">
+      <div class="mode-capsule">
+        <div class="mode-capsule-circle" id="modeBadge">
+          <div class="mi">${cur.icon}</div>
+          <div class="mt">${cur.t}</div>
+        </div>
+        <button class="mode-capsule-bar" onclick="startSession()">
+          开始练习 →
+        </button>
+      </div>
+    </div>
+    <!-- 选择提示 + 模式卡片 -->
+    <div class="mode-choose-label">选择练习模式</div>
+    <div class="mode-grid" id="modeGrid">
+      ${modes.map(m=>`
+        <div class="mode-card${m.id===cur.id?' mode-card-active':''}" data-mode="${m.id}">
+          <div class="mi">${m.icon}</div>
+          <div class="mt">${m.t}</div>
+          <div class="md">${m.d}</div>
+        </div>`).join('')}
+    </div>
+  `;
+  sec.querySelectorAll('.mode-card').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      if(c.dataset.mode === SETTINGS.mode) return;
+      c.style.transform='scale(.88) translateY(-6px)';
+      c.style.opacity='0';
+      setTimeout(()=>{ SETTINGS.mode=c.dataset.mode; saveSettings(); renderHome(); }, 160);
+    });
   });
+  // 点圆形徽章循环切换到下一个模式
+  document.querySelector('.mode-capsule-circle').addEventListener('click', ()=>{
+    const idx = modes.findIndex(m=>m.id===cur.id);
+    SETTINGS.mode = modes[(idx+1)%modes.length].id;
+    saveSettings(); renderHome();
+  });
+  if(stats.errCount>0){
+    document.getElementById('errStatBox').addEventListener('click', ()=>showScreen('stats'));
+  }
 }
 
 // ============ 选课文 ============
@@ -1363,6 +1769,8 @@ function renderLessons(){
   const sel = new Set(SETTINGS.selectedLessons);
   const g5Count = LESSONS.filter(l=>l.grade===5 && sel.has(l.id)).length;
   const g6Count = LESSONS.filter(l=>l.grade===6 && sel.has(l.id)).length;
+  const g5Total = LESSONS.filter(l=>l.grade===5).length;
+  const g6Total = LESSONS.filter(l=>l.grade===6).length;
   el.innerHTML = `
     <h2 class="section-title">选择要复习的课文</h2>
     <div class="card" style="margin-bottom:14px;"><div class="card-inner" style="display:flex;align-items:center;justify-content:space-between;">
@@ -1371,15 +1779,15 @@ function renderLessons(){
         <div style="font-family:var(--serif);font-size:26px;color:var(--seal);">${sel.size} <span style="font-size:13px;color:var(--ink-soft);font-family:var(--sans);">/ ${LESSONS.length} 课</span></div>
       </div>
       <div style="text-align:right;font-size:12px;color:var(--ink-soft);line-height:1.8;">
-        <div>五年级：<b style="color:${g5Count>0?'var(--bamboo-deep)':'var(--ink-soft)'}">${g5Count}</b> / 17</div>
-        <div>六年级：<b style="color:${g6Count>0?'var(--bamboo-deep)':'var(--ink-soft)'}">${g6Count}</b> / 12</div>
+        <div>五年级：<b style="color:${g5Count>0?'var(--bamboo-deep)':'var(--ink-soft)'}">${g5Count}</b> / ${g5Total}</div>
+        <div>六年级：<b style="color:${g6Count>0?'var(--bamboo-deep)':'var(--ink-soft)'}">${g6Count}</b> / ${g6Total}</div>
       </div>
     </div></div>
     ${sel.size===0 ? '<div class="card" style="border-color:var(--seal);"><div class="card-inner" style="color:var(--seal-deep);font-size:13px;">⚠️ 还没有选中任何课文，练习时将无法出题，请至少选择一课。</div></div>' : ''}
     ${sel.size===LESSONS.length ? '<div class="card" style="border-color:var(--gold);"><div class="card-inner" style="color:var(--ink-soft);font-size:12.5px;">💡 当前是「全部课文」都在复习范围内。如果只想专攻某几课，请先点击下方「清空两个年级」，再点选你要的课文——课文格子是开关，已选中的会显示绿色边框。</div></div>' : ''}
     <div class="grade-tabs">
-      <div class="grade-tab ${lessonGradeTab===5?'active':''}" data-g="5">五年级（${g5Count}/17 已选）</div>
-      <div class="grade-tab ${lessonGradeTab===6?'active':''}" data-g="6">六年级（${g6Count}/12 已选）</div>
+      <div class="grade-tab ${lessonGradeTab===5?'active':''}" data-g="5">五年级（${g5Count}/${g5Total} 已选）</div>
+      <div class="grade-tab ${lessonGradeTab===6?'active':''}" data-g="6">六年级（${g6Count}/${g6Total} 已选）</div>
     </div>
     <div class="btn-row">
       <button class="btn btn-outline" onclick="selectAllLessons(${lessonGradeTab})">全选本年级</button>
@@ -1430,7 +1838,7 @@ function openSettings(){
       <input type="date" id="examDateInput" value="${SETTINGS.examDate}" style="display:block;width:100%;padding:10px;margin-top:6px;border-radius:8px;border:1px solid var(--card-line);font-size:14px;">
     </div>
     <div style="margin-bottom:16px;">
-      <label style="font-size:13px;color:var(--ink-soft);">每日新学项目数量：<b id="dailyNewVal">${SETTINGS.dailyNew}</b></label>
+      <label style="font-size:13px;color:var(--ink-soft);">每次练习题数：<b id="dailyNewVal">${SETTINGS.dailyNew}</b>　<span style="font-size:11px;color:var(--border);">（新词约占2/3，复习旧词约1/3）</span></label>
       <input type="range" id="dailyNewInput" min="5" max="40" value="${SETTINGS.dailyNew}" style="width:100%;">
     </div>
     <div style="margin-bottom:16px;">
@@ -1438,12 +1846,23 @@ function openSettings(){
       <input type="range" id="rateInput" min="0.5" max="1.2" step="0.05" value="${SETTINGS.voiceRate}" style="width:100%;">
     </div>
     <button class="btn btn-secondary btn-block" style="margin-top:14px;" onclick="closeSettingsThenAdmin()">📋 题库管理（屏蔽简单字 / 编辑选择题）</button>
-    <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="closeSettings()">完成</button>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-outline" onclick="exportBackup()">⬇️ 导出学习记录</button>
+      <button class="btn btn-outline" onclick="document.getElementById('importFileInput').click()">⬆️ 导入学习记录</button>
+    </div>
+    <input type="file" id="importFileInput" accept="application/json" style="display:none;">
+    <div style="font-size:11.5px;color:var(--ink-soft);margin-top:6px;line-height:1.6;">💡 建议每隔一段时间导出一次备份文件保存好。如果换手机、清理了浏览器数据，或者意外丢失了学习记录，可以用"导入"功能恢复。</div>
+    <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="closeSettings()">完成</button>
     <button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="resetProgress()">⚠️ 清空全部学习记录</button>
   `;
   document.getElementById('examDateInput').addEventListener('change', e=>{ SETTINGS.examDate=e.target.value; saveSettings(); renderCountdown(); });
   document.getElementById('dailyNewInput').addEventListener('input', e=>{ SETTINGS.dailyNew=+e.target.value; document.getElementById('dailyNewVal').textContent=e.target.value; saveSettings(); });
   document.getElementById('rateInput').addEventListener('input', e=>{ SETTINGS.voiceRate=+e.target.value; document.getElementById('rateVal').textContent=e.target.value; saveSettings(); });
+  document.getElementById('importFileInput').addEventListener('change', e=>{
+    const file = e.target.files[0];
+    if(file) importBackup(file);
+    e.target.value = '';
+  });
   document.getElementById('settingsModal').classList.add('show');
 }
 function closeSettings(){ document.getElementById('settingsModal').classList.remove('show'); renderHome(); }
@@ -1453,13 +1872,59 @@ async function resetProgress(){
   PROGRESS = {}; await window.storage.set('progress', JSON.stringify(PROGRESS), false);
   closeSettings();
 }
+
+// ---------- 学习数据备份（导出/导入） ----------
+// 独立运行（手机"添加到主屏幕"）时数据存在浏览器 localStorage 里，
+// 万一换手机、清了浏览器数据、或者 iOS 本地文件场景下存储行为不稳定，
+// 这里提供手动导出/导入一个 JSON 文件作为保险，避免几个月的学习记录彻底丢失。
+const BACKUP_KEYS = ['progress','settings','customTips','blockedChars','customConfusables','deletedBuiltins'];
+async function exportBackup(){
+  const data = { app:'字字珠玑', exportedAt: new Date().toISOString(), version:1, data:{} };
+  for(const key of BACKUP_KEYS){
+    try{
+      const r = await window.storage.get(key, false);
+      if(r && r.value!=null) data.data[key] = r.value;
+    }catch(e){ /* 该项没有数据，跳过 */ }
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = todayStr();
+  a.href = url;
+  a.download = `字字珠玑备份_${dateStr}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  toast('已导出备份文件，请保存好');
+}
+async function importBackup(file){
+  try{
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    if(!parsed || !parsed.data || parsed.app !== '字字珠玑'){
+      alert('这不是字字珠玑的备份文件，无法导入。');
+      return;
+    }
+    if(!confirm('导入备份会覆盖当前手机上的学习记录，确定要继续吗？')) return;
+    for(const key of BACKUP_KEYS){
+      if(parsed.data[key]!=null){
+        await window.storage.set(key, parsed.data[key], false);
+      }
+    }
+    toast('导入成功，正在刷新…');
+    setTimeout(()=>location.reload(), 800);
+  }catch(e){
+    alert('导入失败：文件格式不正确或已损坏。');
+  }
+}
 document.getElementById('settingsModal').addEventListener('click', e=>{ if(e.target.id==='settingsModal') closeSettings(); });
 
 renderCountdown();
 
 
 // ============ 练习会话引擎 ============
-let SESSION = { queue:[], idx:0, correct:0, wrong:0, active:false, usedMCQKeys:new Set(), usedSentMaking:new Set(), hanziBank:[], hanziFreq:{} };
+let SESSION = { queue:[], idx:0, correct:0, wrong:0, wrongIds:[], active:false, usedMCQKeys:new Set(), usedSentMaking:new Set(), hanziBank:[], hanziFreq:{} };
 
 function startSession(){
   if(SETTINGS.selectedLessons.length===0){
@@ -1469,8 +1934,26 @@ function startSession(){
   if(SETTINGS.mode==='sentmaking'){
     const pool = SENTENCE_MAKING_WORDS.length + SENTENCE_PATTERNS.length;
     const sessionLen = Math.min(SETTINGS.dailyNew || 12, pool);
-    SESSION = { queue:new Array(sessionLen).fill(null), idx:0, correct:0, wrong:0, active:true,
+    SESSION = { queue:new Array(sessionLen).fill(null), idx:0, correct:0, wrong:0, wrongIds:[], active:true,
       sessionLen, usedMCQKeys:new Set(), usedSentMaking:new Set(), hanziBank:[], hanziFreq:{} };
+    showScreen('practice');
+    renderCard();
+    return;
+  }
+  // 的地得专项 / 拼音辨析专项：直接从CONFUSABLES题库建队列，不走dueQueue
+  if(SETTINGS.mode==='dede' || SETTINGS.mode==='pinyin'){
+    const pool = effectiveConfusables().filter(c=>
+      SETTINGS.mode==='pinyin'
+        ? c.type==='pinyin'
+        : (c.type!=='pinyin' && (c.blank.includes('的')||c.blank.includes('地')||c.blank.includes('得')))
+    );
+    if(pool.length===0){ showScreen('practice'); renderSessionDone(true); return; }
+    const shuffled = pool.slice().sort(()=>Math.random()-0.5);
+    // 用虚拟item承载专项题，SRS记录借用第一个选中课文的第一条
+    const fallbackItem = selectedItems()[0] || ITEMS[0];
+    SESSION = { queue: shuffled.map(c=>({...fallbackItem, _confusable:c})),
+      idx:0, correct:0, wrong:0, wrongIds:[], active:true, sessionLen:shuffled.length,
+      usedMCQKeys:new Set(), usedSentMaking:new Set(), hanziBank:[], hanziFreq:{} };
     showScreen('practice');
     renderCard();
     return;
@@ -1482,7 +1965,7 @@ function startSession(){
     renderSessionDone(true);
     return;
   }
-  SESSION = { queue: baseQueue, idx:0, correct:0, wrong:0, active:true, sessionLen: baseQueue.length,
+  SESSION = { queue: baseQueue, idx:0, correct:0, wrong:0, wrongIds:[], active:true, sessionLen: baseQueue.length,
     usedMCQKeys:new Set(), usedSentMaking:new Set(), hanziBank: buildHanziBank(), hanziFreq: buildHanziFreq() };
   showScreen('practice');
   renderCard();
@@ -1508,6 +1991,15 @@ function renderCard(){
     return;
   }
   const item = SESSION.queue[SESSION.idx];
+  // 专项题：只要队列里的item携带了_confusable（无论当前mode），都走专项渲染
+  // 这样重做错题时混合队列（普通题+confusable题）也能正确处理
+  if(item && item._confusable){
+    const c = item._confusable;
+    const realItem = ITEMS.find(it=>it.lessonId===c.lessonId) || item;
+    const q = { type:c.type, sentence:c.sentence, blank:c.blank, options:c.options, note:c.note, key:c._key };
+    renderMCQCard(el, realItem, q);
+    return;
+  }
   if(SETTINGS.mode==='mcq'){
     const q = generateMCQForItem(item, SESSION.hanziBank, SESSION.usedMCQKeys, SESSION.hanziFreq);
     if(q){ renderMCQCard(el, item, q); return; }
@@ -1520,6 +2012,26 @@ function renderCard(){
     return;
   }
   // 综合混合模式：按条目本身的类型渲染，小概率转为选择题（仍取材于同一条目）
+  // 每隔约5题，插入一道「的/地/得」专项辨析题（独立触发，不依赖词语匹配）
+  const deDiDePool = effectiveConfusables().filter(c=>('的地得'.includes(c.blank) || c.blank.includes('的') || c.blank.includes('地') || c.blank.includes('得')) && !SESSION.usedMCQKeys.has(c._key));
+  const insertDeDiDe = deDiDePool.length > 0 && SESSION.idx > 0 && SESSION.idx % 5 === 0;
+  if(insertDeDiDe){
+    const pick = deDiDePool[Math.floor(Math.random()*deDiDePool.length)];
+    SESSION.usedMCQKeys.add(pick._key);
+    const q = { sentence:pick.sentence, blank:pick.blank, options:pick.options, note:pick.note, key:pick._key };
+    renderMCQCard(el, item, q);
+    return;
+  }
+  // 拼音辨析题：每8题插入一道
+  const pinyinPool = effectiveConfusables().filter(c=>c.type==='pinyin' && !SESSION.usedMCQKeys.has(c._key));
+  const insertPinyin = pinyinPool.length > 0 && SESSION.idx > 0 && SESSION.idx % 8 === 0;
+  if(insertPinyin){
+    const pick = pinyinPool[Math.floor(Math.random()*pinyinPool.length)];
+    SESSION.usedMCQKeys.add(pick._key);
+    const q = { type:'pinyin', sentence:pick.sentence, blank:pick.blank, options:pick.options, note:pick.note, key:pick._key };
+    renderMCQCard(el, item, q);
+    return;
+  }
   const mcqChance = item.kind==='word' ? 0.22 : 0.15;
   if(Math.random() < mcqChance){
     const q = generateMCQForItem(item, SESSION.hanziBank, SESSION.usedMCQKeys, SESSION.hanziFreq);
@@ -1529,7 +2041,20 @@ function renderCard(){
 }
 
 function lessonTagHTML(it){
-  return `<div class="lesson-tag">${it.grade}年级 第${it.lessonNum}课 <b>《${it.lessonTitle}》</b></div>`;
+  const st = PROGRESS[it.id];
+  const reps = st ? (st.reps || 0) : 0;
+  const mastered = st && st.mastered;
+  // 第N遍标签：显示当前是第几遍（答对后reps已递增，所以+1显示"下一遍"目标更直观）
+  // 用"第N遍"表示"已连续答对N次"，0次=初学
+  let repLabel = '';
+  if(mastered){
+    repLabel = `<span style="margin-left:6px;font-size:10px;background:#4a7c59;color:#fff;padding:1px 7px;border-radius:10px;">✅ 已掌握</span>`;
+  } else if(reps > 0){
+    repLabel = `<span style="margin-left:6px;font-size:10px;background:var(--bamboo);color:#fff;padding:1px 7px;border-radius:10px;">第${reps}遍 ✓ → 还需${4-reps}次</span>`;
+  } else {
+    repLabel = `<span style="margin-left:6px;font-size:10px;color:var(--ink-soft);">初学</span>`;
+  }
+  return `<div class="lesson-tag">${it.grade}年级 第${it.lessonNum}课 <b>《${it.lessonTitle}》</b>${repLabel}</div>`;
 }
 
 // ---------- 词语听写卡 ----------
@@ -1615,50 +2140,97 @@ function renderSentenceCard(el, item){
   speak(item.full);
 }
 
-// ---------- 形近字辨析卡（MCQ） ----------
+// ---------- 形近字辨析卡（MCQ）及拼音辨析卡 ----------
 function renderMCQCard(el, item, q){
-  // q.options 已在生成时洗牌，这里仍做一次保险洗牌，避免任何调用路径遗漏
   const shuffledOptions = shuffleArr(q.options);
-  const display = q.sentence.split(q.blank).join('<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿</span>');
+  const isP = q.type === 'pinyin';
+  const label = isP ? '拼音辨析'
+    : (q.blank.includes('的')||q.blank.includes('地')||q.blank.includes('得')) ? '的地得专项' : '形近字辨析';
+  const speakLabel = isP ? '🔊 朗读词语' : '🔊 朗读整句';
+
+  let bodyHTML;
+  if(isP){
+    const optHTML = shuffledOptions.map(o=>
+      `<div class="mcq-opt" data-o="${o}" style="font-family:monospace;font-size:15px;letter-spacing:1px;">${o}</div>`
+    ).join('');
+    bodyHTML = `
+      <div style="font-size:32px;font-family:var(--serif);text-align:center;letter-spacing:4px;margin:16px 0;">${q.sentence}</div>
+      <div class="hint-text">选出正确的拼音</div>
+      <div class="mcq-options" id="mcqOpts">${optHTML}</div>`;
+  } else {
+    let display;
+    if(q.sentence.includes('__')){
+      display = q.sentence.replace(/__/g,'<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿＿</span>');
+    } else {
+      display = q.sentence.split(q.blank).join('<span class="blank-marker" style="color:var(--seal);border-bottom-style:dashed;">＿</span>');
+    }
+    const optHTML = shuffledOptions.map(o=>`<div class="mcq-opt" data-o="${o}">${o}</div>`).join('');
+    bodyHTML = `
+      <div class="context-sentence">${display}</div>
+      <div class="hint-text">选出空白处正确的字</div>
+      <div class="mcq-options" id="mcqOpts">${optHTML}</div>`;
+  }
+
+  // "下一题"按钮写在HTML里，用visibility控制显隐（不用display，避免iOS layout reflow触发DOM异常）
   el.innerHTML = `
     ${sessionProgressHTML()}
     <div class="prompt-card">
-      <div class="lesson-tag">形近字辨析 · ${item.grade}年级 第${item.lessonNum}课 <b>《${item.lessonTitle}》</b></div>
-      <button class="speak-btn" id="speakBtn">🔊 朗读整句</button>
-      <div class="context-sentence">${display}</div>
-      <div class="hint-text">选出空白处正确的字</div>
-      <div class="mcq-options" id="mcqOpts">
-        ${shuffledOptions.map((o,i)=>`<div class="mcq-opt" data-o="${o}">${o}</div>`).join('')}
+      <div class="lesson-tag">${label} · ${item.grade}年级 第${item.lessonNum}课 <b>《${item.lessonTitle}》</b></div>
+      <button id="speakBtn" class="speak-btn">${speakLabel}</button>
+      ${bodyHTML}
+      <div class="answer-reveal" id="revealBox">
+        <div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div>
+        <button id="nextBtn" class="btn btn-primary btn-block" style="margin-top:14px;display:none;">下一题 →</button>
       </div>
-      <div class="answer-reveal" id="revealBox"><div style="font-size:13px;color:var(--ink-soft);">💡 ${q.note}</div></div>
-      <div style="margin-top:14px;"><button class="tool-btn" id="flagBadBtn" style="color:var(--seal-deep);">🚫 这题出得不好</button></div>
+      <div style="margin-top:14px;text-align:left;">
+        <button id="flagBadBtn" class="tool-btn" style="color:var(--seal-deep);">🚫 这题出得不好</button>
+      </div>
     </div>
   `;
-  document.getElementById('speakBtn').addEventListener('click', ()=>speak(q.sentence));
-  speak(q.sentence);
+
+  // 事件绑定——speak 放在最后，避免 iOS Web Speech API 干扰 DOM 状态
+  const speakBtn  = el.querySelector('#speakBtn');
+  const flagBtn   = el.querySelector('#flagBadBtn');
+  const nextBtn   = el.querySelector('#nextBtn');
+  const revealBox = el.querySelector('#revealBox');
+  const opts      = el.querySelectorAll('#mcqOpts .mcq-opt');
+
+  if(speakBtn) speakBtn.addEventListener('click', ()=>speak(q.sentence));
+  if(nextBtn)  nextBtn.addEventListener('click', ()=>{ SESSION.idx++; renderCard(); }, {once:true});
+
   let answered = false;
-  document.getElementById('flagBadBtn').addEventListener('click', ()=>{
-    if(answered) return;
-    answered = true;
-    flagBadQuestion(q);
+  if(flagBtn) flagBtn.addEventListener('click', ()=>{
+    if(answered) return; answered = true; flagBadQuestion(q);
   });
-  document.querySelectorAll('#mcqOpts .mcq-opt').forEach(opt=>{
+
+  opts.forEach(opt=>{
     opt.addEventListener('click', ()=>{
       if(answered) return;
       answered = true;
       const ok = opt.dataset.o === q.blank;
-      document.querySelectorAll('#mcqOpts .mcq-opt').forEach(o2=>{
+      opts.forEach(o2=>{
         if(o2.dataset.o===q.blank) o2.classList.add('correct');
         else if(o2===opt && !ok) o2.classList.add('wrong');
       });
-      document.getElementById('revealBox').classList.add('show');
-      if(ok) SESSION.correct++; else SESSION.wrong++;
+      if(revealBox) revealBox.classList.add('show');
+      if(nextBtn) nextBtn.style.display = 'block';
+      if(ok) SESSION.correct++; else {
+          SESSION.wrong++;
+          // confusable专项题（拼音/的地得）用_conf:前缀记录key，普通题记录item.id
+          // 注意：renderMCQCard传入的是realItem（无_confusable属性），所以用q.key判断
+          if(q.key && (q.key.startsWith('cur:') || q.key.startsWith('usr:')))
+            SESSION.wrongIds.push('_conf:'+q.key);
+          else if(item.id) SESSION.wrongIds.push(item.id);
+        }
       reviewItem(item.id, ok);
       flashStamp(ok);
-      setTimeout(()=>{ SESSION.idx++; renderCard(); }, 1100);
-    });
+    }, {once:true});
   });
+
+  // speak 最后调用，避免干扰上面的 DOM 绑定
+  speak(q.sentence);
 }
+
 function flagBadQuestion(q){
   if(q.key.startsWith('dyn:')){
     const ch = q.blank;
@@ -1729,19 +2301,45 @@ function renderSentMakingCard(el){
 
 // ---------- 自评按钮 ----------
 function showSelfMark(itemId){
+  const st = getState(itemId);
+  const tooEasyCount = st.tooEasy || 0;
+  const easyLabel = tooEasyCount === 0 ? '这题太简单了' :
+                    tooEasyCount === 1 ? '太简单了（再按1次不再出现）' :
+                                         '太简单了（再按1次永久跳过）';
   document.getElementById('actionArea').innerHTML = `
     <div class="self-mark-row">
       <button class="mark-btn mark-wrong" id="markWrong">✗ 写错了</button>
       <button class="mark-btn mark-right" id="markRight">✓ 写对了</button>
     </div>
+    <div style="text-align:left;margin-top:10px;">
+      <button id="markEasy" style="background:none;border:none;font-size:12px;color:var(--ink-soft);cursor:pointer;padding:2px 0;text-decoration:underline dotted;">🌱 ${easyLabel}</button>
+    </div>
   `;
   document.getElementById('markWrong').addEventListener('click', ()=>{
-    SESSION.wrong++; reviewItem(itemId, false); flashStamp(false);
+    SESSION.wrong++; SESSION.wrongIds.push(itemId); reviewItem(itemId, false); flashStamp(false);
     SESSION.idx++; setTimeout(renderCard, 250);
   });
   document.getElementById('markRight').addEventListener('click', ()=>{
     SESSION.correct++; reviewItem(itemId, true); flashStamp(true);
     SESSION.idx++; setTimeout(renderCard, 250);
+  });
+  document.getElementById('markEasy').addEventListener('click', ()=>{
+    const st = getState(itemId);
+    st.tooEasy = (st.tooEasy || 0) + 1;
+    if(st.tooEasy >= 3){
+      // 永久跳过：due设为遥远未来，ease拉满，reps标大
+      st.due = '9999-12-31'; st.ease = 2.9; st.interval = 9999; st.seen = true;
+      saveProgress();
+      toast('已永久跳过这道题，以后不会再出现');
+      SESSION.correct++; SESSION.idx++; setTimeout(renderCard, 300);
+    } else {
+      // 第1/2次：大幅拉长复习间隔
+      st.ease = 2.9; st.interval = st.tooEasy === 1 ? 30 : 90;
+      st.due = addDays(todayStr(), st.interval); st.seen = true;
+      saveProgress();
+      toast(st.tooEasy === 1 ? '已减少出现频率（再按一次可永久跳过）' : '复习间隔已拉至三个月（再按一次可永久跳过）');
+      SESSION.correct++; SESSION.idx++; setTimeout(renderCard, 300);
+    }
   });
 }
 
@@ -1767,67 +2365,157 @@ function renderSessionDone(noneToReview){
   }
   const total = SESSION.correct + SESSION.wrong;
   const pct = total? Math.round(SESSION.correct/total*100) : 100;
+  const wrongIds = (SESSION.wrongIds||[]).filter((id,i,a)=>a.indexOf(id)===i); // 去重
+  const wrongClickable = wrongIds.length > 0;
+
   el.innerHTML = `
     <div class="empty-state">
       <div class="ei">🏮</div>
       <h2 style="font-family:var(--serif);">本轮练习完成！</h2>
       <div class="stat-row" style="max-width:320px;margin:18px auto;">
         <div class="stat-box mastered"><div class="n">${SESSION.correct}</div><div class="l">答对</div></div>
-        <div class="stat-box due"><div class="n">${SESSION.wrong}</div><div class="l">答错</div></div>
+        <div class="stat-box due">
+          <div class="n" id="wrongCount" style="${wrongClickable?'cursor:pointer;text-decoration:underline dotted;color:var(--seal);':''}">${SESSION.wrong}</div>
+          <div class="l">答错${wrongClickable?'（点击查看）':''}</div>
+        </div>
         <div class="stat-box"><div class="n">${pct}%</div><div class="l">正确率</div></div>
       </div>
+      <div id="wrongDetail" style="display:none;max-width:340px;margin:0 auto 18px;text-align:left;"></div>
       <div class="btn-row" style="max-width:340px;margin:0 auto;">
         <button class="btn btn-primary btn-block" onclick="startSession()">再来一轮</button>
         <button class="btn btn-outline btn-block" onclick="showScreen('home')">返回首页</button>
       </div>
     </div>`;
+
+  if(wrongClickable){
+    document.getElementById('wrongCount').addEventListener('click', ()=>{
+      const detail = document.getElementById('wrongDetail');
+      if(detail.style.display !== 'none'){ detail.style.display='none'; return; }
+
+      // 区分普通词语题和confusable专项题（拼音/的地得）
+      const confKeys   = wrongIds.filter(id=>id.startsWith('_conf:')).map(id=>id.slice(6));
+      const normalIds  = wrongIds.filter(id=>!id.startsWith('_conf:'));
+      const wrongItems = normalIds.map(id=>ITEMS.find(it=>it.id===id)).filter(Boolean);
+      const confItems  = confKeys.map(key=>effectiveConfusables().find(c=>c._key===key)).filter(Boolean);
+
+      const normalHTML = wrongItems.map(it=>`
+        <div style="background:var(--warm);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:15px;font-family:var(--serif);font-weight:600;">${it.kind==='word'?it.text:(it.focus||it.full.slice(0,12)+'…')}</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">${it.grade}年级第${it.lessonNum}课·${it.kind==='word'?'词语':'句子'}</div>
+          </div>
+          <span style="font-size:11px;color:var(--seal);background:rgba(192,57,43,.1);padding:2px 8px;border-radius:10px;">错${PROGRESS[it.id]?PROGRESS[it.id].lapses:1}次</span>
+        </div>`).join('');
+
+      const confHTML = confItems.map(c=>`
+        <div style="background:var(--warm);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:15px;font-family:var(--serif);font-weight:600;">${c.sentence.length<=6?c.sentence:c.sentence.slice(0,10)+'…'}</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">${c.type==='pinyin'?'拼音辨析':'的地得专项'} · 正确答案：${c.blank}</div>
+          </div>
+          <span style="font-size:11px;color:var(--seal);background:rgba(192,57,43,.1);padding:2px 8px;border-radius:10px;">本轮错</span>
+        </div>`).join('');
+
+      const totalWrong = wrongItems.length + confItems.length;
+      detail.innerHTML = `
+        <div style="font-size:13px;color:var(--ink-soft);margin-bottom:10px;">本轮答错 ${totalWrong} 题：</div>
+        ${normalHTML}${confHTML}
+        <button class="btn btn-secondary btn-block" style="margin-top:6px;" id="redoWrongBtn">🔁 马上重做这 ${totalWrong} 题</button>
+      `;
+      detail.style.display = 'block';
+
+      document.getElementById('redoWrongBtn').addEventListener('click', ()=>{
+        // 普通题：直接用 item 对象
+        const redoNormal = wrongItems.map(it=>it);
+        // confusable题：重建带 _confusable 的虚拟 item
+        const fallback = ITEMS.find(it=>it.lessonId===(confItems[0]&&confItems[0].lessonId)) || ITEMS[0];
+        const redoConf = confItems.map(c=>({...fallback, _confusable:c}));
+        const redoQueue = [...redoNormal, ...redoConf].sort(()=>Math.random()-0.5);
+        SESSION = { queue:redoQueue, idx:0, correct:0, wrong:0, wrongIds:[], active:true,
+          sessionLen:redoQueue.length, usedMCQKeys:new Set(), usedSentMaking:new Set(),
+          hanziBank:buildHanziBank(), hanziFreq:buildHanziFreq() };
+        showScreen('practice');
+        renderCard();
+      });
+    });
+  }
 }
 
 // ============ 错字本 / 统计页 ============
+function _collapseToggle(bodyId, chevronId, onOpen){
+  const body = document.getElementById(bodyId);
+  const chev = document.getElementById(chevronId);
+  const opening = body.style.display==='none';
+  body.style.display = opening ? 'block' : 'none';
+  chev.textContent = opening ? '▲ 收起' : '▼ 展开';
+  if(opening && onOpen) onOpen();
+}
 function renderStats(){
   const el = document.getElementById('screen-stats');
   const errItems = [];
   ITEMS.forEach(it=>{
     const st = PROGRESS[it.id];
-    if(st && (st.lapses||0) > 0){
-      errItems.push({it, lapses:st.lapses, lvl:masteryLevel(st)});
-    }
+    if(st && (st.lapses||0) > 0) errItems.push({it, lapses:st.lapses, lvl:masteryLevel(st)});
   });
   errItems.sort((a,b)=>b.lapses-a.lapses);
 
   el.innerHTML = `
-    <h2 class="section-title">📊 各课学习进度</h2>
-    <div class="card" style="margin-bottom:10px;"><div class="card-inner" style="font-size:12px;color:var(--ink-soft);line-height:1.7;">
-      💡 进度条反映「学习进度」：刚接触过算一部分，连续答对多次、间隔越拉越长才算「真正掌握」。
-      所以哪怕已经做了很多题，刚开始几天进度条也会比较低，这是间隔重复正常的过程，不代表没有学习记录。
-    </div></div>
-    <div class="card"><div class="card-inner" id="lessonBars"></div></div>
-    <h2 class="section-title">🔴 错字本 <span class="tag">${errItems.length} 项</span></h2>
-    ${errItems.length===0? `<div class="empty-state"><div class="ei">✨</div>还没有错题记录，继续加油！</div>` :
-    `<div class="error-list">${errItems.slice(0,60).map(e=>`
-      <div class="error-item">
-        <div>
-          <div class="w">${e.it.kind==='word'? e.it.text : (e.it.focus||e.it.full.slice(0,10)+'…')}</div>
-          <div class="meta">${e.it.grade}年级第${e.it.lessonNum}课 · ${e.it.kind==='word'?'词语':'句子'}</div>
-        </div>
-        <span class="lapses">错${e.lapses}次</span>
-      </div>`).join('')}</div>`}
+    <!-- 错字本（默认展开） -->
+    <div class="section-collapse-hdr" id="errHdr2" style="cursor:pointer;">
+      <h2 class="section-title" style="margin:0;">🔴 错字本 <span class="tag">${errItems.length} 项</span></h2>
+      <span id="errChev2" style="font-size:12px;color:var(--ink-soft);">▲ 收起</span>
+    </div>
+    <div id="errBody2">
+      ${errItems.length===0
+        ? `<div class="empty-state"><div class="ei">✨</div>还没有错题记录，继续加油！</div>`
+        : `<div class="error-list">${errItems.slice(0,60).map(e=>`
+            <div class="error-item">
+              <div>
+                <div class="w">${e.it.kind==='word'?e.it.text:(e.it.focus||e.it.full.slice(0,10)+'…')}</div>
+                <div class="meta">${e.it.grade}年级第${e.it.lessonNum}课·${e.it.kind==='word'?'词语':'句子'}</div>
+              </div>
+              <span class="lapses">错${e.lapses}次</span>
+            </div>`).join('')}</div>`}
+    </div>
+
+    <!-- 各课进度（默认折叠） -->
+    <div class="section-collapse-hdr" id="progressHdr2" style="cursor:pointer;margin-top:16px;">
+      <h2 class="section-title" style="margin:0;">📊 各课学习进度</h2>
+      <span id="progressChev2" style="font-size:12px;color:var(--ink-soft);">▼ 展开</span>
+    </div>
+    <div id="progressBody2" style="display:none;">
+      <div class="card" style="margin-bottom:10px;"><div class="card-inner" style="font-size:12px;color:var(--ink-soft);line-height:1.7;">
+        💡 连续答对1次→10天后复习，连续答对2次→30天后复习。进度条越高表示复习间隔越长、掌握越稳。
+      </div></div>
+      <div class="card"><div class="card-inner" id="lessonBars"></div></div>
+    </div>
 
     <h2 class="section-title">📝 易错提示笔记</h2>
     <div class="card"><div class="card-inner" id="tipsArea"></div></div>
   `;
-  const bars = document.getElementById('lessonBars');
-  bars.innerHTML = LESSONS.map(l=>{
-    const s = lessonStats(l.id);
-    const caption = s.touched===0 ? '尚未开始'
-      : `已学 ${s.touched}/${s.total} 题${s.mastered>0?` · 已掌握 ${s.mastered} 题`:''}`;
-    return `<div style="margin-bottom:10px;">
-      <div class="bar-row" style="margin-bottom:2px;"><div class="lbl">${l.grade}年-${l.lesson}课</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${s.score}%"></div></div>
-        <div class="bar-pct">${s.score}%</div></div>
-      <div style="margin-left:82px;font-size:10.5px;color:var(--ink-soft);">${caption}</div>
-    </div>`;
-  }).join('');
+  // 折叠事件绑定
+  document.getElementById('errHdr2').addEventListener('click', ()=>{
+    _collapseToggle('errBody2','errChev2', null);
+  });
+  function renderLessonBars(){
+    const bars = document.getElementById('lessonBars');
+    if(!bars || bars.dataset.rendered) return;
+    bars.dataset.rendered = '1';
+    bars.innerHTML = LESSONS.map(l=>{
+      const s = lessonStats(l.id);
+      const caption = s.touched===0 ? '尚未开始'
+        : `已学 ${s.touched}/${s.total} 题${s.mastered>0?` · 已掌握 ${s.mastered} 题`:''}`;
+      return `<div style="margin-bottom:10px;">
+        <div class="bar-row" style="margin-bottom:2px;"><div class="lbl">${l.grade}年-${l.lesson}课</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${s.score}%"></div></div>
+          <div class="bar-pct">${s.score}%</div></div>
+        <div style="margin-left:82px;font-size:10.5px;color:var(--ink-soft);">${caption}</div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('progressHdr2').addEventListener('click', ()=>{
+    _collapseToggle('progressBody2','progressChev2', renderLessonBars);
+  });
 
   const tipsArea = document.getElementById('tipsArea');
   tipsArea.innerHTML = `<div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">
